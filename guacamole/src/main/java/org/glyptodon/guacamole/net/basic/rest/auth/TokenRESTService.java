@@ -78,6 +78,8 @@ public class TokenRESTService {
      * @param username
      *     The username to associate with the credentials, or null if the
      *     username should be derived from the request.
+     * @param secret
+     *     The token code associate with the credentials used for the 2 factor authentication, or null if it is not needed
      *
      * @param password
      *     The password to associate with the credentials, or null if the
@@ -88,7 +90,7 @@ public class TokenRESTService {
      *     given request, along with the provided username and password.
      */
     private Credentials getCredentials(HttpServletRequest request,
-            String username, String password) {
+            String username, String password, String secret) {
 
         // If no username/password given, try Authorization header
         if (username == null && password == null) {
@@ -101,7 +103,7 @@ public class TokenRESTService {
                     // Decode base64 authorization
                     String basicBase64 = authorization.substring(6);
                     String basicCredentials = new String(DatatypeConverter.parseBase64Binary(basicBase64), "UTF-8");
-
+                    
                     // Pull username/password from auth data
                     int colon = basicCredentials.indexOf(':');
                     if (colon != -1) {
@@ -126,6 +128,7 @@ public class TokenRESTService {
         Credentials credentials = new Credentials();
         credentials.setUsername(username);
         credentials.setPassword(password);
+        credentials.setSecret(secret);
         credentials.setRequest(request);
         credentials.setSession(request.getSession(true));
 
@@ -144,6 +147,9 @@ public class TokenRESTService {
      *
      * @param password
      *     The password of the user who is to be authenticated.
+     *
+     * @param secret
+     *     An optional existing secret used for the two factor authentication
      *
      * @param token
      *     An optional existing auth token for the user who is to be
@@ -170,6 +176,7 @@ public class TokenRESTService {
     @POST
     public APIAuthenticationResult createToken(@FormParam("username") String username,
             @FormParam("password") String password,
+            @FormParam("secret") String secret,
             @FormParam("token") String token,
             @Context HttpServletRequest consumedRequest,
             MultivaluedMap<String, String> parameters)
@@ -179,7 +186,7 @@ public class TokenRESTService {
         HttpServletRequest request = new APIRequest(consumedRequest, parameters);
 
         // Build credentials from request
-        Credentials credentials = getCredentials(request, username, password);
+        Credentials credentials = getCredentials(request, username, password, secret);
 
         // Create/update session producing possibly-new token
         token = authenticationService.authenticate(credentials, token);

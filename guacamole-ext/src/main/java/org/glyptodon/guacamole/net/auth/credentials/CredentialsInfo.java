@@ -82,12 +82,19 @@ public class CredentialsInfo {
     public static final Field PASSWORD = new PasswordField("password");
 
     /**
+     * A field describing the token HTTP parameter expected by Guacamole
+     * during login used for 2 factor authentication.
+     */
+    public static final Field SECRET = new PasswordField("secret");
+    
+    /**
      * CredentialsInfo object which describes standard username/password
      * credentials.
      */
     public static final CredentialsInfo USERNAME_PASSWORD = new CredentialsInfo(Arrays.asList(
         USERNAME,
-        PASSWORD
+        PASSWORD,
+        SECRET
     ));
     
 }

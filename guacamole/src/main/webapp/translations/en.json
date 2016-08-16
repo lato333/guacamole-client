@@ -172,7 +172,8 @@
         "ERROR_INVALID_LOGIN" : "Invalid Login",
 
         "FIELD_HEADER_USERNAME" : "Username",
-        "FIELD_HEADER_PASSWORD" : "Password"
+        "FIELD_HEADER_PASSWORD" : "Password",
+        "FIELD_HEADER_SECRET" : "Token"
 
     },
 

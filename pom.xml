@@ -30,6 +30,7 @@
         <!-- Authentication extensions -->
         <module>extensions/guacamole-auth-jdbc</module>
         <module>extensions/guacamole-auth-ldap</module>
+		<module>extensions/guacamole-auth-ldap-2fa</module>
         <module>extensions/guacamole-auth-noauth</module>
 
     </modules>

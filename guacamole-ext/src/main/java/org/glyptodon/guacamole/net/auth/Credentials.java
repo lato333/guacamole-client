@@ -55,6 +55,11 @@ public class Credentials implements Serializable {
     private String password;
 
     /**
+     * A secret used for 2FA.
+     */
+    private String secret;
+    
+    /**
      * The HttpServletRequest carrying additional credentials, if any.
      */
     private transient HttpServletRequest request;
@@ -80,6 +85,24 @@ public class Credentials implements Serializable {
      */
     public void setPassword(String password) {
         this.password = password;
+    }
+    
+    /**
+     * Returns the secret associated with this set of credentials.
+     * @return The secret associated with this username/password pair, or
+     *         null if no secret has been set.
+     */
+    public String getSecret() {
+        return secret;
+    }
+
+    /**
+     * Sets the secret associated with this set of credentials.
+     * @param secret The secret to associate with this username/password
+     *                 pair.
+     */
+    public void setSecret(String secret) {
+        this.secret = secret;
     }
 
     /**

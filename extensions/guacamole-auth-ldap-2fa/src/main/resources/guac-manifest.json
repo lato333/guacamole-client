@@ -1,0 +1,16 @@
+{
+
+    "guacamoleVersion" : "0.9.9",
+
+    "name"      : "LDAP 2FA Authentication",
+    "namespace" : "guac-ldap-2fa",
+
+    "authProviders" : [
+        "net.sourceforge.guacamole.net.auth.ldap2fa.LDAPAuthenticationProvider"
+    ],
+
+    "translations" : [
+        "translations/en.json"
+    ]
+
+}

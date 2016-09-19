@@ -1,6 +1,6 @@
 {
 
-    "DATA_SOURCE_LDAP" : {
+    "DATA_SOURCE_LDAP2FA" : {
         "NAME" : "LDAP"
     }
 

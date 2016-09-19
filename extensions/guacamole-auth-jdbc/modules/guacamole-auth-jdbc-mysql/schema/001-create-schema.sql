@@ -101,6 +101,10 @@ CREATE TABLE `guacamole_user` (
 
   -- Timezone used for all date/time comparisons and interpretation
   `timezone` VARCHAR(64),
+  
+  -- 2FA via google authenticator
+  `gauth_enabled` boolean NOT NULL DEFAULT 0,
+  `secret_key` varchar(128),
 
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `username` (`username`)

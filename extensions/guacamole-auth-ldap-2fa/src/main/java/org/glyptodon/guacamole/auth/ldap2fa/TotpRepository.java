@@ -52,7 +52,8 @@ public class TotpRepository extends LocalEnvironment  {
 	final String URL = "jdbc:mysql://" + getRequiredProperty(HOSTNAME) +":" + getRequiredProperty(PORT) + "/" + getRequiredProperty(DATABASE);
 	final String MYSQL_USER = getRequiredProperty(USERNAME);
 	final String MYSQL_PASSWORD = getRequiredProperty(PASSWORD);
-	final String SQLQuery = "SELECT secret_key FROM guacamole_2fa_user WHERE USERNAME = ?";
+	final String SQLQuery = "SELECT secret_key, gauth_enabled FROM guacamole_user WHERE USERNAME = ?";
+	
 
 	public String getSecretKey(String userName) throws GuacamoleInvalidCredentialsException {
 		String secret = null;
@@ -87,24 +88,40 @@ public class TotpRepository extends LocalEnvironment  {
 
 		return secret;
 	}
+	
+	public boolean isGAuthEnabled(String userName) throws GuacamoleInvalidCredentialsException {
+		boolean enabled=true;
+		
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+		} catch (ClassNotFoundException e1) {
+			 throw new GuacamoleInvalidCredentialsException("Cannot load mysql-driver", CredentialsInfo.USERNAME_PASSWORD); 
+		}
 
+		try
+		{
 
-	/*public void saveUserCredentials(String userName, String secretKey, int verificationCode, List<Integer> arg3) {
-		String insert = "INSERT INTO guacamole_2fa_user (username, secret_key, verification_code) VALUES (?,?,?)";
-		 try
-		    {
-			 Class.forName( "com.mysql.jdbc.Driver" );
-			Connection cn = DriverManager.getConnection( URL, getRequiredProperty(USERNAME),getRequiredProperty(PASSWORD) );
-			PreparedStatement ps = cn.prepareStatement(insert);
+			logger.debug("Connecting to " + URL);
+			
+			Connection cn = DriverManager.getConnection( URL, MYSQL_USER, MYSQL_PASSWORD);
+			PreparedStatement ps = cn.prepareStatement(SQLQuery);
 			ps.setString(1, userName);
-			ps.setString(2, secretKey);
-			ps.setInt(3,verificationCode);
-			ps.executeUpdate();
-		//TODO save  scratch codes
-		    }
-		 catch(Exception e) {
-			 logger.error("Can't save secret key for user " + userName +":"+e.getMessage());
-		 }
-	}*/
+			ResultSet rs = ps.executeQuery();
+
+			if(rs.getFetchSize()>1) {
+				logger.error("Multiple secret keys for user " + userName);
+			}
+			else {
+				if(rs.next()) {
+					enabled = rs.getBoolean("gauth_enabled");
+				}
+			}
+		}
+		catch(SQLException e) {
+			logger.error("Cannot query user " + userName +": " + e.getMessage());
+		}
+
+		return enabled;
+	}
 
 }

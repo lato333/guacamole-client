@@ -227,35 +227,40 @@ public class AuthenticationProviderService {
         // If bind fails, permission to login is denied
         if (ldapConnection == null)
             throw new GuacamoleInvalidCredentialsException("Permission denied.", CredentialsInfo.USERNAME_PASSWORD);
-     
+       
         // 2FA  
-        GoogleAuthenticator gAuth = new GoogleAuthenticator();
         TotpRepository tp = new TotpRepository();
-        String storedSecret = tp.getSecretKey(credentials.getUsername());
-        String receivedSecret = credentials.getSecret();
-        Integer receivedSecretI;
         
-        if(storedSecret==null || receivedSecret==null) 
-        	throw new GuacamoleInvalidCredentialsException("At least one secret is not available. 2 factor authentication not possible.", CredentialsInfo.USERNAME_PASSWORD);
-        
-        
-        try {
-        	receivedSecretI = Integer.parseInt(receivedSecret);
-        } catch (NumberFormatException e) {
-        	throw new GuacamoleInvalidCredentialsException("Token is not a number.", CredentialsInfo.USERNAME_PASSWORD);
-        }
-
-        boolean isCodeValid = false;
-        
-        try {
-        	isCodeValid =  gAuth.authorize(storedSecret, receivedSecretI);
-        }
-        catch(GoogleAuthenticatorException e) {
-        	isCodeValid = false;
-        }
       
-        if (!isCodeValid) 
-        	throw new GuacamoleInvalidCredentialsException("At least one secret is not available. 2 factor authentication not possible.", CredentialsInfo.USERNAME_PASSWORD);
+        if(tp.isGAuthEnabled(credentials.getUsername())) {
+	        GoogleAuthenticator gAuth = new GoogleAuthenticator();
+	       
+	        String storedSecret = tp.getSecretKey(credentials.getUsername());
+	        String receivedSecret = credentials.getSecret();
+	        Integer receivedSecretI;
+	        
+	        if(storedSecret==null || receivedSecret==null) 
+	        	throw new GuacamoleInvalidCredentialsException("At least one secret is not available. 2 factor authentication not possible.", CredentialsInfo.USERNAME_PASSWORD);
+	        
+	        
+	        try {
+	        	receivedSecretI = Integer.parseInt(receivedSecret);
+	        } catch (NumberFormatException e) {
+	        	throw new GuacamoleInvalidCredentialsException("Token is not a number.", CredentialsInfo.USERNAME_PASSWORD);
+	        }
+	
+	        boolean isCodeValid = false;
+	        
+	        try {
+	        	isCodeValid =  gAuth.authorize(storedSecret, receivedSecretI);
+	        }
+	        catch(GoogleAuthenticatorException e) {
+	        	isCodeValid = false;
+	        }
+	      
+	        if (!isCodeValid) 
+	        	throw new GuacamoleInvalidCredentialsException("At least one secret is not available. 2 factor authentication not possible.", CredentialsInfo.USERNAME_PASSWORD);
+        }
         
         try {
 

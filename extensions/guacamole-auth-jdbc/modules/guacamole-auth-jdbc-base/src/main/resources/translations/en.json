@@ -50,9 +50,10 @@
         "FIELD_HEADER_TIMEZONE"            : "User time zone:",
         "FIELD_HEADER_VALID_FROM"          : "Enable account after:",
         "FIELD_HEADER_VALID_UNTIL"         : "Disable account after:",
-
+        "FIELD_HEADER_GAUTH_ENABLED"       : "Enable google authenticator:",
+        "FIELD_HEADER_SECRET_KEY"          : "Secret key for google authenticator:",
         "SECTION_HEADER_RESTRICTIONS" : "Account Restrictions"
-
+		
     }
 
 }

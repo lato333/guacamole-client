@@ -91,6 +91,9 @@ public class UserModel extends ObjectModel {
      */
     private String timeZone;
 
+    private boolean gAuthEnabled;
+    private String secretKey;
+    
     /**
      * Creates a new, empty user.
      */
@@ -170,6 +173,7 @@ public class UserModel extends ObjectModel {
         this.disabled = disabled;
     }
 
+    
     /**
      * Returns whether the user's password has expired. If a user's password is
      * expired, it must be immediately changed upon login. A user account with
@@ -325,5 +329,21 @@ public class UserModel extends ObjectModel {
     public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
     }
+    
+    public boolean isGAuthEnabled() {
+        return gAuthEnabled;
+    }
 
+    public void setGAuthEnabled(boolean gAuthEnabled) {
+        this.gAuthEnabled = gAuthEnabled;
+    }
+    
+    public String getSecretKey() {
+        return secretKey;
+    }
+    
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
+    }
+    
 }

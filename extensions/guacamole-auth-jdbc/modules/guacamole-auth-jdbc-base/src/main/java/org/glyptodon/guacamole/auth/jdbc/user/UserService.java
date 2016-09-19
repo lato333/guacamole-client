@@ -24,6 +24,9 @@ package org.glyptodon.guacamole.auth.jdbc.user;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.warrenstrange.googleauth.GoogleAuthenticator;
+import com.warrenstrange.googleauth.GoogleAuthenticatorException;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -44,6 +47,7 @@ import org.glyptodon.guacamole.net.auth.AuthenticationProvider;
 import org.glyptodon.guacamole.net.auth.User;
 import org.glyptodon.guacamole.net.auth.credentials.CredentialsInfo;
 import org.glyptodon.guacamole.net.auth.credentials.GuacamoleInsufficientCredentialsException;
+import org.glyptodon.guacamole.net.auth.credentials.GuacamoleInvalidCredentialsException;
 import org.glyptodon.guacamole.net.auth.permission.ObjectPermission;
 import org.glyptodon.guacamole.net.auth.permission.ObjectPermissionSet;
 import org.glyptodon.guacamole.net.auth.permission.SystemPermission;
@@ -300,7 +304,27 @@ public class UserService extends ModeledDirectoryObjectService<ModeledUser, User
         byte[] hash = encryptionService.createPasswordHash(password, userModel.getPasswordSalt());
         if (!Arrays.equals(hash, userModel.getPasswordHash()))
             return null;
-
+      
+        // If 2fa authentication is enabled, validate it
+        if(userModel.isGAuthEnabled()) {
+        	logger.info("Using google authenticator for user ", username);
+        	GoogleAuthenticator gAuth = new GoogleAuthenticator();
+        	
+        	String receivedSecret = credentials.getSecret();
+            Integer receivedSecretI;
+            
+            try {
+            	receivedSecretI = Integer.parseInt(receivedSecret);
+           
+            	if(!gAuth.authorize(userModel.getSecretKey(), receivedSecretI)) {
+            		return null;
+            	}
+            }
+            catch(Exception e) {
+            	return null;
+            }
+        }
+        
         // Create corresponding user object, set up cyclic reference
         ModeledUser user = getObjectInstance(null, userModel);
         user.setCurrentUser(new AuthenticatedUser(authenticationProvider, user, credentials));

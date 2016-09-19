@@ -143,6 +143,11 @@ CREATE TABLE guacamole_user (
   -- Timezone used for all date/time comparisons and interpretation
   timezone varchar(64),
 
+
+  -- 2FA via google authenticator
+  gauth_enabled boolean NOT NULL DEFAULT FALSE,
+  secret_key varchar(128),
+
   PRIMARY KEY (user_id),
 
   CONSTRAINT username

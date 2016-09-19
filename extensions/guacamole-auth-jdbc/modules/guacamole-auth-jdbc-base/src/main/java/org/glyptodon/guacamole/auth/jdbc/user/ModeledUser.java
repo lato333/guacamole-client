@@ -23,6 +23,8 @@
 package org.glyptodon.guacamole.auth.jdbc.user;
 
 import com.google.inject.Inject;
+import com.warrenstrange.googleauth.GoogleAuthenticator;
+
 import java.sql.Date;
 import java.sql.Time;
 import java.text.ParseException;
@@ -46,6 +48,7 @@ import org.glyptodon.guacamole.form.BooleanField;
 import org.glyptodon.guacamole.form.DateField;
 import org.glyptodon.guacamole.form.Field;
 import org.glyptodon.guacamole.form.Form;
+import org.glyptodon.guacamole.form.TextField;
 import org.glyptodon.guacamole.form.TimeField;
 import org.glyptodon.guacamole.form.TimeZoneField;
 import org.glyptodon.guacamole.net.auth.User;
@@ -109,8 +112,12 @@ public class ModeledUser extends ModeledDirectoryObject<UserModel> implements Us
      * time and date attributes related to this user.
      */
     public static final String TIMEZONE_ATTRIBUTE_NAME = "timezone";
-
-    /**
+    
+    public static final String GAUTH_ENABLED_ATTRIBUTE_NAME = "gauth-enabled";
+    
+    public static final String GAUTH_SECRET_KEY_ATTRIBUTE_NAME = "secret-key";
+    
+       /**
      * All attributes related to restricting user accounts, within a logical
      * form.
      */
@@ -121,7 +128,9 @@ public class ModeledUser extends ModeledDirectoryObject<UserModel> implements Us
         new TimeField(ACCESS_WINDOW_END_ATTRIBUTE_NAME),
         new DateField(VALID_FROM_ATTRIBUTE_NAME),
         new DateField(VALID_UNTIL_ATTRIBUTE_NAME),
-        new TimeZoneField(TIMEZONE_ATTRIBUTE_NAME)
+        new TimeZoneField(TIMEZONE_ATTRIBUTE_NAME),
+        new BooleanField(GAUTH_ENABLED_ATTRIBUTE_NAME, "true"),
+        new TextField(GAUTH_SECRET_KEY_ATTRIBUTE_NAME)
     ));
 
     /**
@@ -291,7 +300,12 @@ public class ModeledUser extends ModeledDirectoryObject<UserModel> implements Us
 
         // Set timezone attribute
         attributes.put(TIMEZONE_ATTRIBUTE_NAME, getModel().getTimeZone());
+        
+        // Set gauth_enabled attribute
+        attributes.put(GAUTH_ENABLED_ATTRIBUTE_NAME, getModel().isGAuthEnabled() ? "true" : null);
 
+        // Set secret
+        attributes.put(GAUTH_SECRET_KEY_ATTRIBUTE_NAME, getModel().getSecretKey());
         return attributes;
     }
 
@@ -392,10 +406,27 @@ public class ModeledUser extends ModeledDirectoryObject<UserModel> implements Us
 
         // Translate timezone attribute
         getModel().setTimeZone(TimeZoneField.parse(attributes.get(TIMEZONE_ATTRIBUTE_NAME)));
+        
+        // Translate gauth_enabled attribute
+        getModel().setGAuthEnabled("true".equals(attributes.get(GAUTH_ENABLED_ATTRIBUTE_NAME)));
+        
+       
+        String secretKey = attributes.get(GAUTH_SECRET_KEY_ATTRIBUTE_NAME);
+        
+        if("true".equals(attributes.get(GAUTH_ENABLED_ATTRIBUTE_NAME)) && (secretKey == null || secretKey == "")) {
+        	secretKey = this.generateSecret();
+        }
+        getModel().setSecretKey(secretKey);
 
     }
 
-    /**
+	private String generateSecret() {
+		GoogleAuthenticator gAuth = new GoogleAuthenticator();
+		String secret = gAuth.createCredentials().getKey();
+		return secret;
+	}
+
+	/**
      * Returns the time zone associated with this user. This time zone must be
      * used when interpreting all date/time restrictions related to this user.
      *

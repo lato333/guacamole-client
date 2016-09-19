@@ -39,6 +39,8 @@
         <result column="valid_from"          property="validFrom"         jdbcType="DATE"/>
         <result column="valid_until"         property="validUntil"        jdbcType="DATE"/>
         <result column="timezone"            property="timeZone"          jdbcType="VARCHAR"/>
+        <result column="gauth_enabled"       property="gAuthEnabled"      jdbcType="BOOLEAN"/>
+        <result column="secret_key"          property="secretKey"         jdbcType="VARCHAR"/>
     </resultMap>
 
     <!-- Select all usernames -->
@@ -71,7 +73,9 @@
             access_window_end,
             valid_from,
             valid_until,
-            timezone
+            timezone,
+            gauth_enabled,
+            secret_key
         FROM guacamole_user
         WHERE username IN
             <foreach collection="identifiers" item="identifier"
@@ -95,7 +99,9 @@
             access_window_end,
             valid_from,
             valid_until,
-            timezone
+            timezone,
+            gauth_enabled,
+            secret_key
         FROM guacamole_user
         JOIN guacamole_user_permission ON affected_user_id = guacamole_user.user_id
         WHERE username IN
@@ -122,7 +128,9 @@
             access_window_end,
             valid_from,
             valid_until,
-            timezone
+            timezone,
+            gauth_enabled,
+            secret_key
         FROM guacamole_user
         WHERE
             username = #{username,jdbcType=VARCHAR}
@@ -149,7 +157,9 @@
             access_window_end,
             valid_from,
             valid_until,
-            timezone
+            timezone,
+            gauth_enabled,
+            secret_key
         )
         VALUES (
             #{object.identifier,jdbcType=VARCHAR},
@@ -161,7 +171,9 @@
             #{object.accessWindowEnd,jdbcType=TIME},
             #{object.validFrom,jdbcType=DATE},
             #{object.validUntil,jdbcType=DATE},
-            #{object.timeZone,jdbcType=VARCHAR}
+            #{object.timeZone,jdbcType=VARCHAR},
+            #{object.gAuthEnabled,jdbcType=BOOLEAN},
+            #{object.secretKey,jdbcType=VARCHAR}
         )
 
     </insert>
@@ -177,7 +189,9 @@
             access_window_end = #{object.accessWindowEnd,jdbcType=TIME},
             valid_from = #{object.validFrom,jdbcType=DATE},
             valid_until = #{object.validUntil,jdbcType=DATE},
-            timezone = #{object.timeZone,jdbcType=VARCHAR}
+            timezone = #{object.timeZone,jdbcType=VARCHAR},
+            gauth_enabled = #{object.gAuthEnabled,jdbcType=BOOLEAN},
+            secret_key = #{object.secretKey,jdbcType=VARCHAR}
         WHERE user_id = #{object.objectID,jdbcType=VARCHAR}
     </update>
 

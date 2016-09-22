@@ -206,5 +206,31 @@ angular.module('rest').factory('connectionService', ['$injector',
 
     };
     
+    /**
+     * Makes a request to the REST API to send a WOL packet to a specific host, returning a
+     * promise that can be used for processing the results of the call.
+     *
+     * @param {String} id The ID of the connection.
+     *
+     * @returns {Promise}
+     *     A promise for the HTTP call which will succeed if the wol was sent
+     */
+    service.wakeOnLan = function wakeOnLan(dataSource, id) {
+
+        // Build HTTP parameters set
+        var httpParameters = {
+            token : authenticationService.getCurrentToken()
+        };
+
+        // Retrieve connection
+        return $http({
+            cache   : cacheService.connections,
+            method  : 'POST',
+            url     : 'api/data/' + encodeURIComponent(dataSource) + '/connections/' + encodeURIComponent(id) + '/wol',
+            params  : httpParameters
+        });
+
+    };
+
     return service;
 }]);

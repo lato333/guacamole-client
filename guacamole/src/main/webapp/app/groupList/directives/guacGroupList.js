@@ -94,6 +94,8 @@ angular.module('groupList').directive('guacGroupList', [function guacGroupList()
             // Required services
             var activeConnectionService = $injector.get('activeConnectionService');
             var dataSourceService       = $injector.get('dataSourceService');
+            var connectionService       = $injector.get('connectionService');
+            var guacNotification        = $injector.get('guacNotification');
 
             // Required types
             var GroupListItem = $injector.get('GroupListItem');
@@ -107,6 +109,18 @@ angular.module('groupList').directive('guacGroupList', [function guacGroupList()
              * @type Object.<String, Object.<String, Number>>
              */
             var connectionCount = {};
+
+            /**
+             * An action to be provided along with the object sent to showStatus which
+             * closes the currently-shown status dialog.
+             */
+            var ACKNOWLEDGE_ACTION = {
+                name        : "MANAGE_CONNECTION.ACTION_ACKNOWLEDGE",
+                // Handle action
+                callback    : function acknowledgeCallback() {
+                    guacNotification.showStatus(false);
+                }
+            };
 
             /**
              * A list of all items which should appear at the root level. As
@@ -243,6 +257,35 @@ angular.module('groupList').directive('guacGroupList', [function guacGroupList()
                 groupListItem.isExpanded = !groupListItem.isExpanded;
             };
 
+            /**
+             * Send WOL package to the item representing a connection.
+             * Shows notification if the submission was successfully or has failed
+             *
+             * @param {item} item
+             *     The connection item to send the WOL package.
+             */
+            $scope.wakeOnLan = function wakeOnLan(item) {
+                if(item.isConnection) {
+                    connectionService.wakeOnLan(item.dataSource,item.identifier)
+                    .success(function informUser() {
+                        guacNotification.showStatus({
+                            'className'  : 'info',
+                            'title'      : 'MANAGE_CONNECTION.DIALOG_HEADER_INFO',
+                            'text'       : 'MANAGE_CONNECTION.INFO_WOL',
+                            'actions'    : [ ACKNOWLEDGE_ACTION ]
+                        });
+                    })
+                    // Notify of any errors
+                    .error(function wakeOnLanFailed(error) {
+                        guacNotification.showStatus({
+                            'className'  : 'error',
+                            'title'      : 'MANAGE_CONNECTION.DIALOG_HEADER_ERROR',
+                            'text'       : error.message,
+                            'actions'    : [ ACKNOWLEDGE_ACTION ]
+                        });
+                    });
+                }
+            };
         }]
 
     };

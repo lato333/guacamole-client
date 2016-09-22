@@ -346,4 +346,34 @@ public class ConnectionRESTService {
 
     }
     
+    /**
+     * Sends a WOL package to the provided connection
+     *
+     * @param authToken
+     *     The authentication token that is used to authenticate the user
+     *     performing the operation.
+     *
+     * @param authProviderIdentifier
+     *     The unique identifier of the AuthenticationProvider associated with
+     *     the UserContext containing the connection to be updated.
+     *
+     * @param connectionID
+     *     The identifier of the connection to update.
+     *
+     * @throws GuacamoleException
+     *     If an error occurs while updating the connection.
+     */
+    @POST
+    @Path("/{connectionID}/wol")
+    public void wakeOnLan(@QueryParam("token") String authToken,
+            @PathParam("dataSource") String authProviderIdentifier,
+            @PathParam("connectionID") String connectionID) throws GuacamoleException {
+        GuacamoleSession session = authenticationService.getGuacamoleSession(authToken);
+        UserContext userContext = retrievalService.retrieveUserContext(session, authProviderIdentifier);
+
+        // Retrieve connection to update
+        Connection existingConnection = retrievalService.retrieveConnection(userContext, connectionID);
+
+        existingConnection.wakeOnLan();
+    }
 }

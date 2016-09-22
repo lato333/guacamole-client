@@ -25,6 +25,7 @@
         "ACTION_VIEW_HISTORY"       : "Verlauf",
 
         "DIALOG_HEADER_ERROR" : "Fehler",
+        "DIALOG_HEADER_INFO"  : "Information",
 
         "ERROR_PASSWORD_BLANK"    : "Bitte ein Passwort vergeben.",
         "ERROR_PASSWORD_MISMATCH" : "Die Passwörter stimmen nicht überein.",
@@ -187,6 +188,7 @@
 
         "DIALOG_HEADER_CONFIRM_DELETE" : "Lösche Verbindung",
         "DIALOG_HEADER_ERROR"          : "@:APP.DIALOG_HEADER_ERROR",
+        "DIALOG_HEADER_INFO"           : "@:APP.DIALOG_HEADER_INFO",
 
         "FIELD_HEADER_LOCATION" : "Standort:",
         "FIELD_HEADER_NAME"     : "Name:",
@@ -197,6 +199,7 @@
         "INFO_CONNECTION_DURATION_UNKNOWN" : "--",
         "INFO_CONNECTION_ACTIVE_NOW"       : "Aktivieren",
         "INFO_CONNECTION_NOT_USED"         : "Diese Verbindung wurde bisher nicht verwendet.",
+        "INFO_WOL"                         : "WakeOnLan Paket wurde gesendet, bitte warten Sie ein paar Sekunden bevor Sie sich verbinden.",
 
         "SECTION_HEADER_EDIT_CONNECTION" : "Bearbeite Verbindung",
         "SECTION_HEADER_HISTORY"         : "Verlauf",
@@ -292,6 +295,8 @@
         "FIELD_HEADER_HOSTNAME"        : "Hostname:",
         "FIELD_HEADER_IGNORE_CERT"     : "Server Zertifikat ignorieren:",
         "FIELD_HEADER_INITIAL_PROGRAM" : "Startprogramm:",
+        "FIELD_HEADER_MAC"             : "MAC Adresse (WOL):",
+        "FIELD_HEADER_BROADCAST"       : "Broadcast Adresse (WOL):",
         "FIELD_HEADER_PASSWORD"        : "Passwort:",
         "FIELD_HEADER_PORT"            : "Port:",
         "FIELD_HEADER_REMOTE_APP_ARGS" : "Parameter:",
@@ -355,6 +360,8 @@
         "FIELD_HEADER_PASSWORD"    : "Passwort:",
         "FIELD_HEADER_PASSPHRASE"  : "Passphrase:",
         "FIELD_HEADER_PORT"        : "Port:",
+        "FIELD_HEADER_MAC"         : "MAC Adresse (WOL):",
+        "FIELD_HEADER_BROADCAST"   : "Broadcast Adresse (WOL):",
         "FIELD_HEADER_PRIVATE_KEY" : "Privater Schlüssel:",
 
         "FIELD_OPTION_COLOR_SCHEME_BLACK_WHITE" : "Schwarz auf Weiß",
@@ -399,6 +406,8 @@
         "FIELD_HEADER_PASSWORD"       : "Passwort:",
         "FIELD_HEADER_PASSWORD_REGEX" : "Reguläre Passwortersetzungen:",
         "FIELD_HEADER_PORT"           : "Port:",
+        "FIELD_HEADER_MAC"            : "MAC Adresse (WOL):",
+        "FIELD_HEADER_BROADCAST"      : "Broadcast Adresse (WOL):",
 
         "FIELD_OPTION_COLOR_SCHEME_BLACK_WHITE" : "Schwarz auf Weiß",
         "FIELD_OPTION_COLOR_SCHEME_EMPTY"       : "",
@@ -443,6 +452,8 @@
         "FIELD_HEADER_HOSTNAME"         : "Hostname:",
         "FIELD_HEADER_PASSWORD"         : "Passwort:",
         "FIELD_HEADER_PORT"             : "Port:",
+        "FIELD_HEADER_MAC"              : "MAC Adresse (WOL):",
+        "FIELD_HEADER_BROADCAST"        : "Broadcast Adresse (WOL):",
         "FIELD_HEADER_READ_ONLY"        : "Nur-Lesen:",
         "FIELD_HEADER_SFTP_DIRECTORY"   : "Standard-Upload-Verzeichnis:",
         "FIELD_HEADER_SFTP_HOSTNAME"    : "Hostname:",

@@ -24,6 +24,10 @@ package org.glyptodon.guacamole.auth.jdbc.connection;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.glyptodon.guacamole.auth.jdbc.user.AuthenticatedUser;
 import org.glyptodon.guacamole.auth.jdbc.base.ModeledDirectoryObjectMapper;
 import org.glyptodon.guacamole.auth.jdbc.tunnel.GuacamoleTunnelService;
@@ -48,6 +53,8 @@ import org.glyptodon.guacamole.net.auth.permission.ObjectPermissionSet;
 import org.glyptodon.guacamole.net.auth.permission.SystemPermission;
 import org.glyptodon.guacamole.net.auth.permission.SystemPermissionSet;
 import org.glyptodon.guacamole.protocol.GuacamoleClientInformation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Service which provides convenience methods for creating, retrieving, and
@@ -56,6 +63,11 @@ import org.glyptodon.guacamole.protocol.GuacamoleClientInformation;
  * @author Michael Jumper, James Muehlner
  */
 public class ConnectionService extends ModeledGroupedDirectoryObjectService<ModeledConnection, Connection, ConnectionModel> {
+
+    /**
+     * Logger for this class.
+     */
+    private static final Logger logger = LoggerFactory.getLogger(ConnectionService.class);
 
     /**
      * Mapper for accessing connections.
@@ -92,7 +104,7 @@ public class ConnectionService extends ModeledGroupedDirectoryObjectService<Mode
      */
     @Inject
     private GuacamoleTunnelService tunnelService;
-    
+
     @Override
     protected ModeledDirectoryObjectMapper<ConnectionModel> getObjectMapper() {
         return connectionMapper;
@@ -507,5 +519,87 @@ public class ConnectionService extends ModeledGroupedDirectoryObjectService<Mode
         throw new GuacamoleSecurityException("Permission denied.");
 
     }
+
+    /**
+     * Sends a magic packet (WOL) to the connection as the given user.
+     * If the user does not have permission to read the
+     * connection, permission will be denied.
+     *
+     * @param user
+     *     The user connecting to the connection.
+     *
+     * @param connection
+     *     The connection being connected to.
+     *
+     * @throws GuacamoleException
+     *     If permission to connect to this connection is denied or if packet could not be sent.
+     */
+    public void wakeOnLan(AuthenticatedUser user, ModeledConnection connection)
+            throws GuacamoleException {
+
+        String broadcastIPStr = null;
+        String macStr = null;
+        DatagramSocket socket = null;
+
+        // Wake On LAN only if READ permission is granted
+        if (!hasObjectPermission(user, connection.getIdentifier(), ObjectPermission.Type.READ)) {
+            // The user does not have permission to send a WOL package
+            throw new GuacamoleSecurityException("Permission denied.");
+        }
+
+        for (ParameterModel parameter : parameterMapper.select(connection.getIdentifier())) {
+            if(parameter.getName().equals("mac")) {
+                macStr = parameter.getValue();
+            }
+            else if(parameter.getName().equals("broadcast")) {
+                broadcastIPStr = parameter.getValue();
+            }
+        }
+
+        if(broadcastIPStr==null || macStr==null ) throw new GuacamoleException("MAC and Broadcast address have to be provided.");
+
+        try {
+
+            byte[] macBytes = getMacBytes(macStr);
+            byte[] bytes = new byte[6 + 16 * macBytes.length];
+
+            for (int i = 0; i < 6; i++) {
+                bytes[i] = (byte) 0xff;
+            }
+
+            for (int i = 6; i < bytes.length; i += macBytes.length) {
+                System.arraycopy(macBytes, 0, bytes, i, macBytes.length);
+            }
+
+            InetAddress address = InetAddress.getByName(broadcastIPStr);
+            DatagramPacket packet = new DatagramPacket(bytes, bytes.length, address, 9);
+            socket = new DatagramSocket();
+            logger.debug("Sending WOL packet to " + macStr + " via " + broadcastIPStr);
+            socket.send(packet);
+        }
+        catch (Exception e) {
+            throw new GuacamoleException("Failed to send Wake-on-LAN packet: " + e.getMessage());
+        }
+        finally {
+            if(socket != null) socket.close();
+        }
+    }
     
+    private static byte[] getMacBytes(String macStr) throws IllegalArgumentException {
+        byte[] bytes = new byte[6];
+        String[] hex = macStr.split("(\\:|\\-)");
+        if (hex.length != 6) {
+            throw new IllegalArgumentException("Invalid MAC address.");
+        }
+
+        try {
+            for (int i = 0; i < 6; i++) {
+                bytes[i] = (byte) Integer.parseInt(hex[i], 16);
+            }
+        }
+        catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid hex digit in MAC address.");
+        }
+        return bytes;
+    }
 }

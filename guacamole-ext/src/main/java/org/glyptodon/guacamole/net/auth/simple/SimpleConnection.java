@@ -143,4 +143,8 @@ public class SimpleConnection extends AbstractConnection {
         return Collections.<ConnectionRecord>emptyList();
     }
 
+    @Override
+    public void wakeOnLan() throws GuacamoleException {
+        //not implemented
+    }
 }

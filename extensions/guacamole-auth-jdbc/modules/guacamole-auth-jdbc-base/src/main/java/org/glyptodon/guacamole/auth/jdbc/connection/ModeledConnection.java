@@ -168,6 +168,11 @@ public class ModeledConnection extends ModeledGroupedDirectoryObject<ConnectionM
     public GuacamoleTunnel connect(GuacamoleClientInformation info) throws GuacamoleException {
         return connectionService.connect(getCurrentUser(), this, info);
     }
+    
+    @Override
+    public void wakeOnLan() throws GuacamoleException {
+        connectionService.wakeOnLan(getCurrentUser(), this);
+    }
 
     @Override
     public int getActiveConnections() {

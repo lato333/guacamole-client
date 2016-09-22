@@ -122,4 +122,10 @@ public interface Connection extends Identifiable, Connectable {
      */
     public List<? extends ConnectionRecord> getHistory() throws GuacamoleException;
 
+    /**
+     * Sends a WOL packet to this Connection.
+     *
+     */
+    void wakeOnLan() throws GuacamoleException;
+
 }

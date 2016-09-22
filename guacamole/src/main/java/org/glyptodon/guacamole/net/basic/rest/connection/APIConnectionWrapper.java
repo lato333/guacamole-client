@@ -134,5 +134,10 @@ public class APIConnectionWrapper implements Connection {
     public List<? extends ConnectionRecord> getHistory() throws GuacamoleException {
         return Collections.<ConnectionRecord>emptyList();
     }
+
+    @Override
+    public void wakeOnLan() throws GuacamoleException {
+        throw new UnsupportedOperationException("Operation not supported.");
+    }
     
 }

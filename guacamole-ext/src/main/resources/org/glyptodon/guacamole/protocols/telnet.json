@@ -12,6 +12,14 @@
                 {
                     "name"  : "port",
                     "type"  : "NUMERIC"
+                },
+                 {
+                    "name"  : "mac",
+                    "type"  : "TEXT"
+                },
+                 {
+                    "name"  : "broadcast",
+                    "type"  : "TEXT"
                 }
             ]
         },

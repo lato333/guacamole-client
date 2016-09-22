@@ -31,6 +31,7 @@
         <!-- Connection name -->
         <span class="name">{{item.name}}</span>
         
+     
         <!-- Active user count -->
         <span class="activeUserCount" ng-show="item.getActiveConnections()"
             translate="HOME.INFO_ACTIVE_USER_COUNT"
@@ -38,3 +39,4 @@
 
     </div>
 </a>
+<button ng-click="wakeOnLan(item)">Wake On LAN</button>

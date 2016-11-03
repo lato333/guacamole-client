@@ -92,6 +92,7 @@
     -khtml-background-size:  175px 94px;
     background-image: url("images/guac-tricolor.png");
     background-repeat: no-repeat;
+    background-position: center;
 }
 
 .login-ui.continuation div.login-dialog {

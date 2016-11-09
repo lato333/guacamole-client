@@ -173,20 +173,20 @@ public class AuthenticationProviderService {
 
         // Require username
         if (username == null || username.isEmpty()) {
-            logger.debug("Anonymous bind is not currently allowed by the LDAP authentication provider.");
+            logger.error("Anonymous bind is not currently allowed by the LDAP authentication provider.");
             return null;
         }
 
         // Require password, and do not allow anonymous binding
         if (password == null || password.isEmpty()) {
-            logger.debug("Anonymous bind is not currently allowed by the LDAP authentication provider.");
+            logger.error("Anonymous bind is not currently allowed by the LDAP authentication provider.");
             return null;
         }
 
         // Determine user DN
         String userDN = getUserBindDN(username);
         if (userDN == null) {
-            logger.debug("Unable to determine DN for user \"{}\".", username);
+            logger.error("Unable to determine DN for user \"{}\".", username);
             return null;
         }
 
@@ -239,13 +239,15 @@ public class AuthenticationProviderService {
 	        String receivedSecret = credentials.getSecret();
 	        Integer receivedSecretI;
 	        
-	        if(storedSecret==null || receivedSecret==null) 
-	        	throw new GuacamoleInvalidCredentialsException("At least one secret is not available. 2 factor authentication not possible.", CredentialsInfo.USERNAME_PASSWORD);
-	        
+	        if(storedSecret==null || receivedSecret==null) {
+	        	logger.debug("At least one secret is not available. 2 factor authentication not possible for " + credentials.getUsername());
+	           	throw new GuacamoleInvalidCredentialsException("At least one secret is not available. 2 factor authentication not possible.", CredentialsInfo.USERNAME_PASSWORD);
+	        }
 	        
 	        try {
 	        	receivedSecretI = Integer.parseInt(receivedSecret);
 	        } catch (NumberFormatException e) {
+	        	logger.error("Token is not a number. User: " + credentials.getUsername());
 	        	throw new GuacamoleInvalidCredentialsException("Token is not a number.", CredentialsInfo.USERNAME_PASSWORD);
 	        }
 	
@@ -258,8 +260,10 @@ public class AuthenticationProviderService {
 	        	isCodeValid = false;
 	        }
 	      
-	        if (!isCodeValid) 
-	        	throw new GuacamoleInvalidCredentialsException("At least one secret is not available. 2 factor authentication not possible.", CredentialsInfo.USERNAME_PASSWORD);
+	        if (!isCodeValid) {
+	        	logger.error("Secrets do not match. 2 factor authentication not possible for " + credentials.getUsername());
+	        	throw new GuacamoleInvalidCredentialsException("Secrets do not match. 2 factor authentication not possible.", CredentialsInfo.USERNAME_PASSWORD);
+	        }
         }
         
         try {

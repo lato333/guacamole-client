@@ -135,5 +135,17 @@ public class LDAPGuacamoleProperties {
         public String getName() { return "ldap-encryption-method"; }
 
     };
+    
+	/**
+	 * The maximum number of results a LDAP query can return.
+	 */
+	public static final IntegerGuacamoleProperty LDAP_MAX_SEARCH_RESULTS = new IntegerGuacamoleProperty() {
+
+		@Override
+		public String getName() {
+			return "ldap-max-search-results";
+		}
+
+	};
 
 }

@@ -26,6 +26,8 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.novell.ldap.LDAPConnection;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
+import com.warrenstrange.googleauth.GoogleAuthenticatorConfig;
+import com.warrenstrange.googleauth.GoogleAuthenticatorConfig.GoogleAuthenticatorConfigBuilder;
 import com.warrenstrange.googleauth.GoogleAuthenticatorException;
 
 import java.util.List;
@@ -233,7 +235,10 @@ public class AuthenticationProviderService {
         
       
         if(tp.isGAuthEnabled(credentials.getUsername())) {
-	        GoogleAuthenticator gAuth = new GoogleAuthenticator();
+        	GoogleAuthenticatorConfigBuilder builder = new GoogleAuthenticatorConfigBuilder(); 
+        	builder.setWindowSize(12);
+        	
+	        GoogleAuthenticator gAuth = new GoogleAuthenticator(builder.build());
 	       
 	        String storedSecret = tp.getSecretKey(credentials.getUsername());
 	        String receivedSecret = credentials.getSecret();

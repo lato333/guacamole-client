@@ -148,4 +148,16 @@ public class LDAPGuacamoleProperties {
 
 	};
 
+	/**
+	 * Filter User belonging to particular group
+	 */
+	public static final StringGuacamoleProperty LDAP_USER_FILTER = new StringGuacamoleProperty() {
+
+		@Override
+		public String getName() {
+			return "ldap-user-filter";
+		}
+
+	};
+
 }

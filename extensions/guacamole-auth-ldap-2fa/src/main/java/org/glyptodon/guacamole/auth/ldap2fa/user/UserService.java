@@ -93,12 +93,21 @@ public class UserService {
 			// Set search limits
 			LDAPSearchConstraints constraints = new LDAPSearchConstraints();
 			constraints.setMaxResults(confService.getMaxResults());
+			
+			String searchFilter = "(&(objectClass=*)(" + escapingService.escapeLDAPSearchFilter(usernameAttribute)
+					+ "=*)";
+			String userFilter = confService.getUserFilter();
+			if (userFilter != null) {
+				searchFilter += userFilter.trim();
+			}
+			searchFilter += ")";
 
-            // Find all Guacamole users underneath base DN
+			logger.debug("Using search filter: " + searchFilter);
+           // Find all Guacamole users underneath base DN
             LDAPSearchResults results = ldapConnection.search(
                 confService.getUserBaseDN(),
                 LDAPConnection.SCOPE_SUB,
-                "(&(objectClass=*)(" + escapingService.escapeLDAPSearchFilter(usernameAttribute) + "=*))",
+                searchFilter,
                 null,
                 false,
                 constraints
@@ -217,6 +226,11 @@ public class UserService {
         if (usernameAttributes.size() > 1)
             ldapQuery.append(")");
 
+        //user filter
+        String userFilter = confService.getUserFilter();
+		if (userFilter != null)  
+			ldapQuery.append(userFilter.trim());
+       
         // Close overall query (AND clause)
         ldapQuery.append(")");
 
@@ -249,7 +263,10 @@ public class UserService {
             String username) throws GuacamoleException {
 
         try {
-
+        	// Set search limits
+			LDAPSearchConstraints constraints = new LDAPSearchConstraints();
+			constraints.setMaxResults(confService.getMaxResults());
+			
             List<String> userDNs = new ArrayList<String>();
 
             // Find all Guacamole users underneath base DN and matching the
@@ -259,7 +276,8 @@ public class UserService {
                 LDAPConnection.SCOPE_SUB,
                 generateLDAPQuery(username),
                 null,
-                false
+                false,
+                constraints
             );
 
             // Add all DNs for found users

@@ -1,23 +1,20 @@
 /*
- * Copyright (C) 2015 Glyptodon LLC
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 /**
@@ -61,7 +58,7 @@ angular.module('rest').factory('schemaService', ['$injector',
         return $http({
             cache   : cacheService.schema,
             method  : 'GET',
-            url     : 'api/schema/' + encodeURIComponent(dataSource) + '/users/attributes',
+            url     : 'api/session/data/' + encodeURIComponent(dataSource) + '/schema/userAttributes',
             params  : httpParameters
         });
 
@@ -95,7 +92,41 @@ angular.module('rest').factory('schemaService', ['$injector',
         return $http({
             cache   : cacheService.schema,
             method  : 'GET',
-            url     : 'api/schema/' + encodeURIComponent(dataSource) + '/connections/attributes',
+            url     : 'api/session/data/' + encodeURIComponent(dataSource) + '/schema/connectionAttributes',
+            params  : httpParameters
+        });
+
+    };
+
+    /**
+     * Makes a request to the REST API to get the list of available attributes
+     * for sharing profile objects, returning a promise that provides an array
+     * of @link{Form} objects if successful. Each element of the array describes
+     * a logical grouping of possible attributes.
+     *
+     * @param {String} dataSource
+     *     The unique identifier of the data source containing the sharing
+     *     profiles whose available attributes are to be retrieved. This
+     *     identifier corresponds to an AuthenticationProvider within the
+     *     Guacamole web application.
+     *
+     * @returns {Promise.<Form[]>}
+     *     A promise which will resolve with an array of @link{Form}
+     *     objects, where each @link{Form} describes a logical grouping of
+     *     possible attributes.
+     */
+    service.getSharingProfileAttributes = function getSharingProfileAttributes(dataSource) {
+
+        // Build HTTP parameters set
+        var httpParameters = {
+            token : authenticationService.getCurrentToken()
+        };
+
+        // Retrieve available sharing profile attributes
+        return $http({
+            cache   : cacheService.schema,
+            method  : 'GET',
+            url     : 'api/session/data/' + encodeURIComponent(dataSource) + '/schema/sharingProfileAttributes',
             params  : httpParameters
         });
 
@@ -129,7 +160,7 @@ angular.module('rest').factory('schemaService', ['$injector',
         return $http({
             cache   : cacheService.schema,
             method  : 'GET',
-            url     : 'api/schema/' + encodeURIComponent(dataSource) + '/connectionGroups/attributes',
+            url     : 'api/session/data/' + encodeURIComponent(dataSource) + '/schema/connectionGroupAttributes',
             params  : httpParameters
         });
 
@@ -160,7 +191,7 @@ angular.module('rest').factory('schemaService', ['$injector',
         return $http({
             cache   : cacheService.schema,
             method  : 'GET',
-            url     : 'api/schema/' + encodeURIComponent(dataSource) + '/protocols',
+            url     : 'api/session/data/' + encodeURIComponent(dataSource) + '/schema/protocols',
             params  : httpParameters
         });
 

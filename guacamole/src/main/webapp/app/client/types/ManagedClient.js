@@ -1,23 +1,20 @@
 /*
- * Copyright (C) 2014 Glyptodon LLC
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 /**
@@ -29,19 +26,22 @@ angular.module('client').factory('ManagedClient', ['$rootScope', '$injector',
     // Required types
     var ClientProperties     = $injector.get('ClientProperties');
     var ClientIdentifier     = $injector.get('ClientIdentifier');
+    var ClipboardData        = $injector.get('ClipboardData');
     var ManagedClientState   = $injector.get('ManagedClientState');
     var ManagedDisplay       = $injector.get('ManagedDisplay');
-    var ManagedFileDownload  = $injector.get('ManagedFileDownload');
     var ManagedFilesystem    = $injector.get('ManagedFilesystem');
     var ManagedFileUpload    = $injector.get('ManagedFileUpload');
+    var ManagedShareLink     = $injector.get('ManagedShareLink');
 
     // Required services
     var $document              = $injector.get('$document');
     var $q                     = $injector.get('$q');
+    var $rootScope             = $injector.get('$rootScope');
     var $window                = $injector.get('$window');
     var authenticationService  = $injector.get('authenticationService');
     var connectionGroupService = $injector.get('connectionGroupService');
     var connectionService      = $injector.get('connectionService');
+    var tunnelService          = $injector.get('tunnelService');
     var guacAudio              = $injector.get('guacAudio');
     var guacHistory            = $injector.get('guacHistory');
     var guacImage              = $injector.get('guacImage');
@@ -101,18 +101,12 @@ angular.module('client').factory('ManagedClient', ['$rootScope', '$injector',
         /**
          * The current clipboard contents.
          *
-         * @type String
+         * @type ClipboardData
          */
-        this.clipboardData = template.clipboardData || '';
-
-        /**
-         * All downloaded files. As files are downloaded, their progress can be
-         * observed through the elements of this array. It is intended that
-         * this array be manipulated externally as needed.
-         *
-         * @type ManagedFileDownload[]
-         */
-        this.downloads = template.downloads || [];
+        this.clipboardData = template.clipboardData || new ClipboardData({
+            type : 'text/plain',
+            data : ''
+        });
 
         /**
          * All uploaded files. As files are uploaded, their progress can be
@@ -133,6 +127,15 @@ angular.module('client').factory('ManagedClient', ['$rootScope', '$injector',
         this.filesystems = template.filesystems || [];
 
         /**
+         * All available share links generated for the this ManagedClient via
+         * ManagedClient.createShareLink(). Each resulting share link is stored
+         * under the identifier of its corresponding SharingProfile.
+         *
+         * @type Object.<String, ManagedShareLink>
+         */
+        this.shareLinks = template.shareLinks || {};
+
+        /**
          * The current state of the Guacamole client (idle, connecting,
          * connected, terminated with error, etc.).
          * 
@@ -149,6 +152,15 @@ angular.module('client').factory('ManagedClient', ['$rootScope', '$injector',
         this.clientProperties = template.clientProperties || new ClientProperties();
 
     };
+
+    /**
+     * The mimetype of audio data to be sent along the Guacamole connection if
+     * audio input is supported.
+     *
+     * @constant
+     * @type String
+     */
+    ManagedClient.AUDIO_INPUT_MIMETYPE = 'audio/L16;rate=44100,channels=2';
 
     /**
      * Returns a promise which resolves with the string of connection
@@ -255,6 +267,36 @@ angular.module('client').factory('ManagedClient', ['$rootScope', '$injector',
     };
 
     /**
+     * Requests the creation of a new audio stream, recorded from the user's
+     * local audio input device. If audio input is supported by the connection,
+     * an audio stream will be created which will remain open until the remote
+     * desktop requests that it be closed. If the audio stream is successfully
+     * created but is later closed, a new audio stream will automatically be
+     * established to take its place. The mimetype used for all audio streams
+     * produced by this function is defined by
+     * ManagedClient.AUDIO_INPUT_MIMETYPE.
+     *
+     * @param {Guacamole.Client} client
+     *     The Guacamole.Client for which the audio stream is being requested.
+     */
+    var requestAudioStream = function requestAudioStream(client) {
+
+        // Create new audio stream, associating it with an AudioRecorder
+        var stream = client.createAudioStream(ManagedClient.AUDIO_INPUT_MIMETYPE);
+        var recorder = Guacamole.AudioRecorder.getInstance(stream, ManagedClient.AUDIO_INPUT_MIMETYPE);
+
+        // If creation of the AudioRecorder failed, simply end the stream
+        if (!recorder)
+            stream.sendEnd();
+
+        // Otherwise, ensure that another audio stream is created after this
+        // audio stream is closed
+        else
+            recorder.onclose = requestAudioStream.bind(this, client);
+
+    };
+
+    /**
      * Creates a new ManagedClient, connecting it to the specified connection
      * or group.
      *
@@ -353,6 +395,14 @@ angular.module('client').factory('ManagedClient', ['$rootScope', '$injector',
                     case 3:
                         ManagedClientState.setConnectionState(managedClient.clientState,
                             ManagedClientState.ConnectionState.CONNECTED);
+
+                        // Send any clipboard data already provided
+                        if (managedClient.clipboardData)
+                            ManagedClient.setClipboard(managedClient, managedClient.clipboardData);
+
+                        // Begin streaming audio input if possible
+                        requestAudioStream(client);
+
                         break;
 
                     // Update history when disconnecting
@@ -384,35 +434,49 @@ angular.module('client').factory('ManagedClient', ['$rootScope', '$injector',
         // Handle any received clipboard data
         client.onclipboard = function clientClipboardReceived(stream, mimetype) {
 
-            // Only text/plain is supported for now
-            if (mimetype !== "text/plain") {
-                stream.sendAck("Only text/plain supported", Guacamole.Status.Code.UNSUPPORTED);
-                return;
+            var reader;
+
+            // If the received data is text, read it as a simple string
+            if (/^text\//.exec(mimetype)) {
+
+                reader = new Guacamole.StringReader(stream);
+
+                // Assemble received data into a single string
+                var data = '';
+                reader.ontext = function textReceived(text) {
+                    data += text;
+                };
+
+                // Set clipboard contents once stream is finished
+                reader.onend = function textComplete() {
+                    $rootScope.$apply(function updateClipboard() {
+                        managedClient.clipboardData = new ClipboardData({
+                            type : mimetype,
+                            data : data
+                        });
+                    });
+                };
+
             }
 
-            var reader = new Guacamole.StringReader(stream);
-            var data = "";
-
-            // Append any received data to buffer
-            reader.ontext = function clipboard_text_received(text) {
-                data += text;
-                stream.sendAck("Received", Guacamole.Status.Code.SUCCESS);
-            };
-
-            // Update state when done
-            reader.onend = function clipboard_text_end() {
-                $rootScope.$apply(function updateClipboard() {
-                    managedClient.clipboardData = data;
-                });
-            };
+            // Otherwise read the clipboard data as a Blob
+            else {
+                reader = new Guacamole.BlobReader(stream, mimetype);
+                reader.onend = function blobComplete() {
+                    $rootScope.$apply(function updateClipboard() {
+                        managedClient.clipboardData = new ClipboardData({
+                            type : mimetype,
+                            data : reader.getBlob()
+                        });
+                    });
+                };
+            }
 
         };
 
         // Handle any received files
         client.onfile = function clientFileReceived(stream, mimetype, filename) {
-            $rootScope.$apply(function startDownload() {
-                managedClient.downloads.push(ManagedFileDownload.getInstance(stream, mimetype, filename));
-            });
+            tunnelService.downloadStream(tunnel.uuid, stream, mimetype, filename);
         };
 
         // Handle any received filesystem objects
@@ -487,7 +551,103 @@ angular.module('client').factory('ManagedClient', ['$rootScope', '$injector',
         }
 
         // Start and manage file upload
-        managedClient.uploads.push(ManagedFileUpload.getInstance(managedClient.client, file, object, streamName));
+        managedClient.uploads.push(ManagedFileUpload.getInstance(managedClient, file, object, streamName));
+
+    };
+
+    /**
+     * Sends the given clipboard data over the given Guacamole client, setting
+     * the contents of the remote clipboard to the data provided.
+     *
+     * @param {ManagedClient} managedClient
+     *     The ManagedClient over which the given clipboard data is to be sent.
+     *
+     * @param {ClipboardData} data
+     *     The clipboard data to send.
+     */
+    ManagedClient.setClipboard = function setClipboard(managedClient, data) {
+
+        var writer;
+
+        // Create stream with proper mimetype
+        var stream = managedClient.client.createClipboardStream(data.type);
+
+        // Send data as a string if it is stored as a string
+        if (typeof data.data === 'string') {
+            writer = new Guacamole.StringWriter(stream);
+            writer.sendText(data.data);
+            writer.sendEnd();
+        }
+
+        // Otherwise, assume the data is a File/Blob
+        else {
+
+            // Write File/Blob asynchronously
+            writer = new Guacamole.BlobWriter(stream);
+            writer.oncomplete = function clipboardSent() {
+                writer.sendEnd();
+            };
+
+            // Begin sending data
+            writer.sendBlob(data.data);
+
+        }
+
+    };
+
+    /**
+     * Produces a sharing link for the given ManagedClient using the given
+     * sharing profile. The resulting sharing link, and any required login
+     * information, can be retrieved from the <code>shareLinks</code> property
+     * of the given ManagedClient once the various underlying service calls
+     * succeed.
+     *
+     * @param {ManagedClient} client
+     *     The ManagedClient which will be shared via the generated sharing
+     *     link.
+     *
+     * @param {SharingProfile} sharingProfile
+     *     The sharing profile to use to generate the sharing link.
+     *
+     * @returns {Promise}
+     *     A Promise which is resolved once the sharing link has been
+     *     successfully generated, and rejected if generating the link fails.
+     */
+    ManagedClient.createShareLink = function createShareLink(client, sharingProfile) {
+
+        // Retrieve sharing credentials for the sake of generating a share link
+        var credentialRequest = tunnelService.getSharingCredentials(
+                client.tunnel.uuid, sharingProfile.identifier);
+
+        // Add a new share link once the credentials are ready
+        credentialRequest.success(function sharingCredentialsReceived(sharingCredentials) {
+            client.shareLinks[sharingProfile.identifier] =
+                ManagedShareLink.getInstance(sharingProfile, sharingCredentials);
+        });
+
+        return credentialRequest;
+
+    };
+
+    /**
+     * Returns whether the given ManagedClient is being shared. A ManagedClient
+     * is shared if it has any associated share links.
+     *
+     * @param {ManagedClient} client
+     *     The ManagedClient to check.
+     *
+     * @returns {Boolean}
+     *     true if the ManagedClient has at least one associated share link,
+     *     false otherwise.
+     */
+    ManagedClient.isShared = function isShared(client) {
+
+        // The connection is shared if at least one share link exists
+        for (var dummy in client.shareLinks)
+            return true;
+
+        // No share links currently exist
+        return false;
 
     };
 

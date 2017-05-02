@@ -1,23 +1,20 @@
 /*
- * Copyright (C) 2015 Glyptodon LLC
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 /**
@@ -204,6 +201,10 @@ angular.module('form').provider('formService', function formServiceProvider() {
          * model:
          *     The current String value of the field, if any.
          *
+         * @param {Element} fieldContainer
+         *     The DOM Element whose contents should be replaced with the
+         *     compiled field template.
+         *
          * @param {String} fieldTypeName
          *     The name of the field type defining the nature of the element to be
          *     created.
@@ -215,43 +216,54 @@ angular.module('form').provider('formService', function formServiceProvider() {
          *     A Promise which resolves to the compiled Element. If an error occurs
          *     while retrieving the field type, this Promise will be rejected.
          */
-        service.createFieldElement = function createFieldElement(fieldTypeName, scope) {
+        service.insertFieldElement = function insertFieldElement(fieldContainer,
+            fieldTypeName, scope) {
 
             // Ensure field type is defined
             var fieldType = provider.fieldTypes[fieldTypeName];
             if (!fieldType)
                 return $q.reject();
 
-            // Populate scope using defined controller
-            if (fieldType.module && fieldType.controller) {
-                var $controller = angular.injector(['ng', fieldType.module]).get('$controller');
-                $controller(fieldType.controller, {'$scope' : scope});
+            var templateRequest;
+
+            // Use raw HTML template if provided
+            if (fieldType.template) {
+                var deferredTemplate = $q.defer();
+                deferredTemplate.resolve(fieldType.template);
+                templateRequest = deferredTemplate.promise;
             }
+
+            // If no raw HTML template is provided, retrieve template from URL
+            else
+                templateRequest = $templateRequest(fieldType.templateUrl);
 
             // Defer compilation of template pending successful retrieval
             var compiledTemplate = $q.defer();
 
-            // Use raw HTML template if provided
-            if (fieldType.template)
-                compiledTemplate.resolve($compile(fieldType.template)(scope));
+            // Resolve with compiled HTML upon success
+            templateRequest.then(function templateRetrieved(html) {
 
-            // If no raw HTML template is provided, retrieve template from URL
-            else {
+                // Insert template into DOM
+                fieldContainer.innerHTML = html;
 
-                // Attempt to retrieve template HTML
-                $templateRequest(fieldType.templateUrl)
+                // Populate scope using defined controller
+                if (fieldType.module && fieldType.controller) {
+                    var $controller = angular.injector(['ng', fieldType.module]).get('$controller');
+                    $controller(fieldType.controller, {
+                        '$scope'   : scope,
+                        '$element' : angular.element(fieldContainer.childNodes)
+                    });
+                }
 
-                // Resolve with compiled HTML upon success
-                .then(function templateRetrieved(html) {
-                    compiledTemplate.resolve($compile(html)(scope));
-                })
+                // Compile DOM with populated scope
+                compiledTemplate.resolve($compile(fieldContainer.childNodes)(scope));
 
-                // Reject on failure
-                ['catch'](function templateError() {
-                    compiledTemplate.reject();
-                });
+            })
 
-            }
+            // Reject on failure
+            ['catch'](function templateError() {
+                compiledTemplate.reject();
+            });
 
             // Return promise which resolves to the compiled template
             return compiledTemplate.promise;

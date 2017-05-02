@@ -1,23 +1,20 @@
 /*
- * Copyright (C) 2014 Glyptodon LLC
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 /**
@@ -38,6 +35,7 @@ angular.module('settings').directive('guacSettingsConnections', [function guacSe
 
             // Required types
             var ConnectionGroup = $injector.get('ConnectionGroup');
+            var GroupListItem   = $injector.get('GroupListItem');
             var PermissionSet   = $injector.get('PermissionSet');
 
             // Required services
@@ -172,6 +170,30 @@ angular.module('settings').directive('guacSettingsConnections', [function guacSe
             };
 
             /**
+             * Returns whether the current user can create new sharing profiles
+             * within the current data source.
+             *
+             * @return {Boolean}
+             *     true if the current user can create new sharing profiles
+             *     within the current data source, false otherwise.
+             */
+            $scope.canCreateSharingProfiles = function canCreateSharingProfiles() {
+
+                // Abort if permissions have not yet loaded
+                if (!$scope.permissions)
+                    return false;
+
+                // Can create sharing profiles if adminstrator or have explicit permission
+                if (PermissionSet.hasSystemPermission($scope.permissions, PermissionSet.SystemPermissionType.ADMINISTER)
+                 || PermissionSet.hasSystemPermission($scope.permissions, PermissionSet.SystemPermissionType.CREATE_SHARING_PROFILE))
+                     return true;
+
+                // Current data source does not allow sharing profile creation
+                return false;
+
+            };
+
+            /**
              * Returns whether the current user can create new connections or
              * connection groups or make changes to existing connections or
              * connection groups within the current data source. The
@@ -190,7 +212,9 @@ angular.module('settings').directive('guacSettingsConnections', [function guacSe
                     return false;
 
                 // Creating connections/groups counts as management
-                if ($scope.canCreateConnections() || $scope.canCreateConnectionGroups())
+                if ($scope.canCreateConnections()
+                        || $scope.canCreateConnectionGroups()
+                        || $scope.canCreateSharingProfiles())
                     return true;
 
                 // Can manage connections if granted explicit update or delete
@@ -208,6 +232,177 @@ angular.module('settings').directive('guacSettingsConnections', [function guacSe
 
             };
 
+            /**
+             * Returns whether the current user can update the connection having
+             * the given identifier within the current data source.
+             *
+             * @param {String} identifier
+             *     The identifier of the connection to check.
+             *
+             * @return {Boolean}
+             *     true if the current user can update the connection having the
+             *     given identifier within the current data source, false
+             *     otherwise.
+             */
+            $scope.canUpdateConnection = function canUpdateConnection(identifier) {
+
+                // Abort if permissions have not yet loaded
+                if (!$scope.permissions)
+                    return false;
+
+                // Can update the connection if adminstrator or have explicit permission
+                if (PermissionSet.hasSystemPermission($scope.permissions, PermissionSet.SystemPermissionType.ADMINISTER)
+                 || PermissionSet.hasConnectionPermission($scope.permissions, PermissionSet.ObjectPermissionType.UPDATE, identifier))
+                     return true;
+
+                // Current data sources does not allow the connection to be updated
+                return false;
+
+            };
+
+            /**
+             * Returns whether the current user can update the connection group
+             * having the given identifier within the current data source.
+             *
+             * @param {String} identifier
+             *     The identifier of the connection group to check.
+             *
+             * @return {Boolean}
+             *     true if the current user can update the connection group
+             *     having the given identifier within the current data source,
+             *     false otherwise.
+             */
+            $scope.canUpdateConnectionGroup = function canUpdateConnectionGroup(identifier) {
+
+                // Abort if permissions have not yet loaded
+                if (!$scope.permissions)
+                    return false;
+
+                // Can update the connection if adminstrator or have explicit permission
+                if (PermissionSet.hasSystemPermission($scope.permissions, PermissionSet.SystemPermissionType.ADMINISTER)
+                 || PermissionSet.hasConnectionGroupPermission($scope.permissions, PermissionSet.ObjectPermissionType.UPDATE, identifier))
+                     return true;
+
+                // Current data sources does not allow the connection group to be updated
+                return false;
+
+            };
+
+            /**
+             * Adds connection-group-specific contextual actions to the given
+             * array of GroupListItems. Each contextual action will be
+             * represented by a new GroupListItem.
+             *
+             * @param {GroupListItem[]} items
+             *     The array of GroupListItems to which new GroupListItems
+             *     representing connection-group-specific contextual actions
+             *     should be added.
+             *
+             * @param {GroupListItem} [parent]
+             *     The GroupListItem representing the connection group which
+             *     contains the given array of GroupListItems, if known.
+             */
+            var addConnectionGroupActions = function addConnectionGroupActions(items, parent) {
+
+                // Do nothing if we lack permission to modify the parent at all
+                if (parent && !$scope.canUpdateConnectionGroup(parent.identifier))
+                    return;
+
+                // Add action for creating a child connection, if the user has
+                // permission to do so
+                if ($scope.canCreateConnections())
+                    items.push(new GroupListItem({
+                        type        : 'new-connection',
+                        dataSource  : $scope.dataSource,
+                        weight      : 1,
+                        wrappedItem : parent
+                    }));
+
+                // Add action for creating a child connection group, if the user
+                // has permission to do so
+                if ($scope.canCreateConnectionGroups())
+                    items.push(new GroupListItem({
+                        type        : 'new-connection-group',
+                        dataSource  : $scope.dataSource,
+                        weight      : 1,
+                        wrappedItem : parent
+                    }));
+
+            };
+
+            /**
+             * Adds connection-specific contextual actions to the given array of
+             * GroupListItems. Each contextual action will be represented by a
+             * new GroupListItem.
+             *
+             * @param {GroupListItem[]} items
+             *     The array of GroupListItems to which new GroupListItems
+             *     representing connection-specific contextual actions should
+             *     be added.
+             *
+             * @param {GroupListItem} [parent]
+             *     The GroupListItem representing the connection which contains
+             *     the given array of GroupListItems, if known.
+             */
+            var addConnectionActions = function addConnectionActions(items, parent) {
+
+                // Do nothing if we lack permission to modify the parent at all
+                if (parent && !$scope.canUpdateConnection(parent.identifier))
+                    return;
+
+                // Add action for creating a child sharing profile, if the user
+                // has permission to do so
+                if ($scope.canCreateSharingProfiles())
+                    items.push(new GroupListItem({
+                        type        : 'new-sharing-profile',
+                        dataSource  : $scope.dataSource,
+                        weight      : 1,
+                        wrappedItem : parent
+                    }));
+
+            };
+
+            /**
+             * Decorates the given GroupListItem, including all descendants,
+             * adding contextual actions.
+             *
+             * @param {GroupListItem} item
+             *     The GroupListItem which should be decorated with additional
+             *     GroupListItems representing contextual actions.
+             */
+            var decorateItem = function decorateItem(item) {
+
+                // If the item is a connection group, add actions specific to
+                // connection groups
+                if (item.type === GroupListItem.Type.CONNECTION_GROUP)
+                    addConnectionGroupActions(item.children, item);
+
+                // If the item is a connection, add actions specific to
+                // connections
+                else if (item.type === GroupListItem.Type.CONNECTION)
+                    addConnectionActions(item.children, item);
+
+                // Decorate all children
+                angular.forEach(item.children, decorateItem);
+
+            };
+
+            /**
+             * Callback which decorates all items within the given array of
+             * GroupListItems, including their descendants, adding contextual
+             * actions.
+             *
+             * @param {GroupListItem[]} items
+             *     The array of GroupListItems which should be decorated with
+             *     additional GroupListItems representing contextual actions.
+             */
+            $scope.rootItemDecorator = function rootItemDecorator(items) {
+
+                // Decorate each root-level item
+                angular.forEach(items, decorateItem);
+
+            };
+
             // Retrieve current permissions
             permissionService.getPermissions($scope.dataSource, currentUsername)
             .success(function permissionsRetrieved(permissions) {
@@ -222,19 +417,19 @@ angular.module('settings').directive('guacSettingsConnections', [function guacSe
                 if (!$scope.canManageConnections())
                     $location.path('/');
 
-            });
-            
-            // Retrieve all connections for which we have UPDATE or DELETE permission
-            dataSourceService.apply(
-                connectionGroupService.getConnectionGroupTree,
-                [$scope.dataSource],
-                ConnectionGroup.ROOT_IDENTIFIER,
-                [PermissionSet.ObjectPermissionType.UPDATE, PermissionSet.ObjectPermissionType.DELETE]
-            )
-            .then(function connectionGroupsReceived(rootGroups) {
-                $scope.rootGroups = rootGroups;
-            });
-            
+                // Retrieve all connections for which we have UPDATE or DELETE permission
+                dataSourceService.apply(
+                    connectionGroupService.getConnectionGroupTree,
+                    [$scope.dataSource],
+                    ConnectionGroup.ROOT_IDENTIFIER,
+                    [PermissionSet.ObjectPermissionType.UPDATE, PermissionSet.ObjectPermissionType.DELETE]
+                )
+                .then(function connectionGroupsReceived(rootGroups) {
+                    $scope.rootGroups = rootGroups;
+                });
+
+            }); // end retrieve permissions
+
         }]
     };
     

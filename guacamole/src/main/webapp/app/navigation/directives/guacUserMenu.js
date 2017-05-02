@@ -1,23 +1,20 @@
 /*
- * Copyright (C) 2015 Glyptodon LLC
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 /**
@@ -43,35 +40,14 @@ angular.module('navigation').directive('guacUserMenu', [function guacUserMenu() 
         },
 
         templateUrl: 'app/navigation/templates/guacUserMenu.html',
-        controller: ['$scope', '$injector', '$element', function guacUserMenuController($scope, $injector, $element) {
+        controller: ['$scope', '$injector',
+            function guacUserMenuController($scope, $injector) {
 
             // Get required services
-            var $document             = $injector.get('$document');
             var $location             = $injector.get('$location');
             var $route                = $injector.get('$route');
             var authenticationService = $injector.get('authenticationService');
             var userPageService       = $injector.get('userPageService');
-
-            /**
-             * The outermost element of the user menu directive.
-             *
-             * @type Element
-             */
-            var element = $element[0];
-
-            /**
-             * The main document object.
-             *
-             * @type Document
-             */
-            var document = $document[0];
-
-            /**
-             * Whether the contents of the user menu are currently shown.
-             *
-             * @type Boolean
-             */
-            $scope.menuShown = false;
 
             /**
              * The username of the current user.
@@ -92,12 +68,16 @@ angular.module('navigation').directive('guacUserMenu', [function guacUserMenu() 
             .then(function retrievedMainPages(pages) {
                 $scope.pages = pages;
             });
-            
+
             /**
-             * Toggles visibility of the user menu.
+             * Returns whether the current user has authenticated anonymously.
+             *
+             * @returns {Boolean}
+             *     true if the current user has authenticated anonymously, false
+             *     otherwise.
              */
-            $scope.toggleMenu = function toggleMenu() {
-                $scope.menuShown = !$scope.menuShown;
+            $scope.isAnonymous = function isAnonymous() {
+                return authenticationService.isAnonymous();
             };
 
             /**
@@ -127,18 +107,6 @@ angular.module('navigation').directive('guacUserMenu', [function guacUserMenu() 
              * All available actions for the current user.
              */
             $scope.actions = [ LOGOUT_ACTION ];
-
-            // Close menu when use clicks anywhere else
-            document.body.addEventListener('click', function clickOutsideMenu() {
-                $scope.$apply(function closeMenu() {
-                    $scope.menuShown = false;
-                });
-            }, false);
-
-            // Prevent click within menu from triggering the outside-menu handler
-            element.addEventListener('click', function clickInsideMenu(e) {
-                e.stopPropagation();
-            }, false);
 
         }] // end controller
 

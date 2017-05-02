@@ -1,23 +1,20 @@
 /*
- * Copyright (C) 2014 Glyptodon LLC
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 /**
@@ -294,7 +291,10 @@ angular.module('manage').controller('manageConnectionController', ['$scope', '$i
 
     // If we are creating a new connection, populate skeleton connection data
     else {
-        $scope.connection = new Connection({ protocol: 'vnc' });
+        $scope.connection = new Connection({
+            protocol         : 'vnc',
+            parentIdentifier : $location.search().parent
+        });
         $scope.historyEntryWrappers = [];
         $scope.parameters = {};
     }
@@ -350,7 +350,7 @@ angular.module('manage').controller('manageConnectionController', ['$scope', '$i
      * Cancels all pending edits, returning to the management page.
      */
     $scope.cancel = function cancel() {
-        $location.path('/settings/' + encodeURIComponent($scope.selectedDataSource) + '/connections');
+        $location.url('/settings/' + encodeURIComponent($scope.selectedDataSource) + '/connections');
     };
     
     /**
@@ -372,7 +372,7 @@ angular.module('manage').controller('manageConnectionController', ['$scope', '$i
         // Save the connection
         connectionService.saveConnection($scope.selectedDataSource, $scope.connection)
         .success(function savedConnection() {
-            $location.path('/settings/' + encodeURIComponent($scope.selectedDataSource) + '/connections');
+            $location.url('/settings/' + encodeURIComponent($scope.selectedDataSource) + '/connections');
         })
 
         // Notify of any errors
@@ -380,7 +380,7 @@ angular.module('manage').controller('manageConnectionController', ['$scope', '$i
             guacNotification.showStatus({
                 'className'  : 'error',
                 'title'      : 'MANAGE_CONNECTION.DIALOG_HEADER_ERROR',
-                'text'       : error.message,
+                'text'       : error.translatableMessage,
                 'actions'    : [ ACKNOWLEDGE_ACTION ]
             });
         });
@@ -430,7 +430,7 @@ angular.module('manage').controller('manageConnectionController', ['$scope', '$i
             guacNotification.showStatus({
                 'className'  : 'error',
                 'title'      : 'MANAGE_CONNECTION.DIALOG_HEADER_ERROR',
-                'text'       : error.message,
+                'text'       : error.translatableMessage,
                 'actions'    : [ ACKNOWLEDGE_ACTION ]
             });
         });
@@ -446,7 +446,9 @@ angular.module('manage').controller('manageConnectionController', ['$scope', '$i
         // Confirm deletion request
         guacNotification.showStatus({
             'title'      : 'MANAGE_CONNECTION.DIALOG_HEADER_CONFIRM_DELETE',
-            'text'       : 'MANAGE_CONNECTION.TEXT_CONFIRM_DELETE',
+            'text'       : {
+                key : 'MANAGE_CONNECTION.TEXT_CONFIRM_DELETE'
+            },
             'actions'    : [ DELETE_ACTION, CANCEL_ACTION]
         });
 

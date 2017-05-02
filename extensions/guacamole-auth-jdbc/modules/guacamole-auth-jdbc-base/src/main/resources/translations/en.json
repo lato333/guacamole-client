@@ -26,6 +26,7 @@
 
     "CONNECTION_GROUP_ATTRIBUTES" : {
 
+        "FIELD_HEADER_ENABLE_SESSION_AFFINITY"  : "Enable session affinity:",
         "FIELD_HEADER_MAX_CONNECTIONS"          : "Maximum number of connections:",
         "FIELD_HEADER_MAX_CONNECTIONS_PER_USER" : "Maximum number of connections per user:",
 
@@ -37,8 +38,32 @@
         "NAME" : "MySQL"
     },
 
+    "DATA_SOURCE_MYSQL_SHARED" : {
+        "NAME" : "Shared Connections (MySQL)"
+    },
+
     "DATA_SOURCE_POSTGRESQL" : {
         "NAME" : "PostgreSQL"
+    },
+
+    "DATA_SOURCE_POSTGRESQL_SHARED" : {
+        "NAME" : "Shared Connections (PostgreSQL)"
+    },
+
+    "HOME" : {
+        "INFO_SHARED_BY" : "Shared by {USERNAME}"
+    },
+
+    "PASSWORD_POLICY" : {
+
+        "ERROR_CONTAINS_USERNAME"      : "Passwords may not contain the username.",
+        "ERROR_REQUIRES_DIGIT"         : "Passwords must contain at least one digit.",
+        "ERROR_REQUIRES_MULTIPLE_CASE" : "Passwords must contain both uppercase and lowercase characters.",
+        "ERROR_REQUIRES_NON_ALNUM"     : "Passwords must contain at least one symbol.",
+        "ERROR_REUSED"                 : "This password has already been used. Please do not reuse any of the previous {HISTORY_SIZE} {HISTORY_SIZE, plural, one{password} other{passwords}}.",
+        "ERROR_TOO_SHORT"              : "Passwords must be at least {LENGTH} {LENGTH, plural, one{character} other{characters}} long.",
+        "ERROR_TOO_YOUNG"              : "The password for this account has already been reset. Please wait at least {WAIT} more {WAIT, plural, one{day} other{days}} before changing the password again."
+
     },
 
     "USER_ATTRIBUTES" : {

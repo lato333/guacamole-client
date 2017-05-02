@@ -35,8 +35,6 @@
 
         "INFO_ACTIVE_USER_COUNT" : "Подключено пользователей {USERS}.",
 
-        "NAME" : "Guacamole ${project.version}",
-
         "TEXT_HISTORY_DURATION" : "{VALUE} {UNIT, select, second{{VALUE, plural, one{секунда} other{сек}}} minute{{VALUE, plural, one{минута} other{мин}}} hour{{VALUE, plural, one{час} other{ч}}} day{{VALUE, plural, one{день} other{дн}}} other{}}"
 
     },
@@ -221,10 +219,27 @@
 
     },
 
+    "MANAGE_SHARING_PROFILE" : {
+
+        "ACTION_ACKNOWLEDGE" : "@:APP.ACTION_ACKNOWLEDGE",
+        "ACTION_CANCEL"      : "@:APP.ACTION_CANCEL",
+        "ACTION_CLONE"       : "@:APP.ACTION_CLONE",
+        "ACTION_DELETE"      : "@:APP.ACTION_DELETE",
+        "ACTION_SAVE"        : "@:APP.ACTION_SAVE",
+
+        "DIALOG_HEADER_ERROR" : "@:APP.DIALOG_HEADER_ERROR",
+
+        "FIELD_HEADER_NAME" : "Название:",
+
+        "SECTION_HEADER_PARAMETERS" : "Настройки"
+
+    },
+
     "MANAGE_USER" : {
 
         "ACTION_ACKNOWLEDGE"   : "@:APP.ACTION_ACKNOWLEDGE",
         "ACTION_CANCEL"        : "@:APP.ACTION_CANCEL",
+        "ACTION_CLONE"         : "@:APP.ACTION_CLONE",
         "ACTION_DELETE"        : "@:APP.ACTION_DELETE",
         "ACTION_SAVE"          : "@:APP.ACTION_SAVE",
 
@@ -272,6 +287,7 @@
         "FIELD_HEADER_INITIAL_PROGRAM" : "Запуск программ при подключении:",
         "FIELD_HEADER_PASSWORD"        : "Пароль:",
         "FIELD_HEADER_PORT"            : "Порт:",
+        "FIELD_HEADER_READ_ONLY"       : "Только просмотр:",
         "FIELD_HEADER_REMOTE_APP_ARGS" : "Параметры RemoteApp:",
         "FIELD_HEADER_REMOTE_APP_DIR"  : "Рабочий каталог RemoteApp:",
         "FIELD_HEADER_REMOTE_APP"      : "Программы RemoteApp:",
@@ -323,6 +339,7 @@
         "FIELD_HEADER_PASSPHRASE"  : "Секретная фраза:",
         "FIELD_HEADER_PORT"        : "Порт:",
         "FIELD_HEADER_PRIVATE_KEY" : "Приватный ключ:",
+        "FIELD_HEADER_READ_ONLY"   : "Только просмотр:",
 
         "FIELD_OPTION_FONT_SIZE_8"     : "8",
         "FIELD_OPTION_FONT_SIZE_9"     : "9",
@@ -353,6 +370,7 @@
         "FIELD_HEADER_PASSWORD"       : "Пароль:",
         "FIELD_HEADER_PASSWORD_REGEX" : "Регулярное выражение для пароля:",
         "FIELD_HEADER_PORT"           : "Порт:",
+        "FIELD_HEADER_READ_ONLY"      : "Только просмотр:",
 
         "FIELD_OPTION_FONT_SIZE_8"     : "8",
         "FIELD_OPTION_FONT_SIZE_9"     : "9",

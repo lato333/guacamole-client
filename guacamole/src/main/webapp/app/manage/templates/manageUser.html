@@ -1,24 +1,3 @@
-<!--
-Copyright 2015 Glyptodon LLC.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
--->
 
 <div class="manage-user view" ng-class="{loading: !isLoaded()}">
 
@@ -78,8 +57,8 @@ THE SOFTWARE.
                     </tr>
                     <tr>
                         <th>{{'MANAGE_USER.FIELD_HEADER_CHANGE_OWN_PASSWORD' | translate}}</th>
-                        <td><input type="checkbox" ng-model="permissionFlags.userPermissions.UPDATE[user.username]"
-                                                   ng-change="userPermissionChanged('UPDATE', user.username)"/></td>
+                        <td><input type="checkbox" ng-model="permissionFlags.userPermissions.UPDATE[selfUsername]"
+                                                   ng-change="userPermissionChanged('UPDATE', selfUsername)"/></td>
                     </tr>
                 </table>
             </div>
@@ -99,8 +78,11 @@ THE SOFTWARE.
                 <guac-group-list
                     context="groupListContext"
                     connection-groups="filteredRootGroups"
-                    connection-template="'app/manage/templates/connectionPermission.html'"
-                    connection-group-template="'app/manage/templates/connectionGroupPermission.html'"
+                    templates="{
+                        'connection'       : 'app/manage/templates/connectionPermission.html',
+                        'sharing-profile'  : 'app/manage/templates/sharingProfilePermission.html',
+                        'connection-group' : 'app/manage/templates/connectionGroupPermission.html'
+                    }"
                     page-size="20"/>
             </div>
         </div>
@@ -108,6 +90,7 @@ THE SOFTWARE.
         <!-- Form action buttons -->
         <div class="action-buttons">
             <button ng-show="canSaveUser()" ng-click="saveUser()">{{'MANAGE_USER.ACTION_SAVE' | translate}}</button>
+            <button ng-show="canCloneUser()" ng-click="cloneUser()">{{'MANAGE_USER.ACTION_CLONE' | translate}}</button>
             <button ng-click="cancel()">{{'MANAGE_USER.ACTION_CANCEL' | translate}}</button>
             <button ng-show="canDeleteUser()" ng-click="deleteUser()" class="danger">{{'MANAGE_USER.ACTION_DELETE' | translate}}</button>
         </div>

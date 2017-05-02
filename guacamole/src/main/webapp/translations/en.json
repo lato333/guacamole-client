@@ -4,6 +4,9 @@
     
     "APP" : {
 
+        "NAME"    : "Apache Guacamole",
+        "VERSION" : "${project.version}",
+
         "ACTION_ACKNOWLEDGE"        : "OK",
         "ACTION_CANCEL"             : "Cancel",
         "ACTION_CLONE"              : "Clone",
@@ -21,6 +24,7 @@
         "ACTION_NAVIGATE_HOME"      : "Home",
         "ACTION_SAVE"               : "Save",
         "ACTION_SEARCH"             : "Search",
+        "ACTION_SHARE"              : "Share",
         "ACTION_UPDATE_PASSWORD"    : "Update Password",
         "ACTION_VIEW_HISTORY"       : "History",
 
@@ -38,7 +42,8 @@
 
         "INFO_ACTIVE_USER_COUNT" : "Currently in use by {USERS} {USERS, plural, one{user} other{users}}.",
 
-        "NAME" : "Guacamole ${project.version}",
+        "TEXT_ANONYMOUS_USER"   : "Anonymous",
+        "NAME" : "Remote Login",
 
         "TEXT_HISTORY_DURATION" : "{VALUE} {UNIT, select, second{{VALUE, plural, one{second} other{seconds}}} minute{{VALUE, plural, one{minute} other{minutes}}} hour{{VALUE, plural, one{hour} other{hours}}} day{{VALUE, plural, one{day} other{days}}} other{}}"
 
@@ -54,6 +59,7 @@
         "ACTION_NAVIGATE_HOME"             : "@:APP.ACTION_NAVIGATE_HOME",
         "ACTION_RECONNECT"                 : "Reconnect",
         "ACTION_SAVE_FILE"                 : "@:APP.ACTION_SAVE",
+        "ACTION_SHARE"                     : "@:APP.ACTION_SHARE",
         "ACTION_UPLOAD_FILES"              : "Upload Files",
 
         "DIALOG_HEADER_CONNECTING"       : "Connecting",
@@ -100,7 +106,9 @@
         "HELP_MOUSE_MODE"          : "Determines how the remote mouse behaves with respect to touches.",
         "HELP_MOUSE_MODE_ABSOLUTE" : "Tap to click. The click occurs at the location of the touch.",
         "HELP_MOUSE_MODE_RELATIVE" : "Drag to move the mouse pointer and tap to click. The click occurs at the location of the pointer.",
+        "HELP_SHARE_LINK"          : "The current connection is being shared, and can be accessed by anyone with the following {LINKS, plural, one{link} other{links}}:",
 
+        "INFO_CONNECTION_SHARED" : "This connection is now shared.",
         "INFO_NO_FILE_TRANSFERS" : "No file transfers.",
 
         "NAME_INPUT_METHOD_NONE"   : "None",
@@ -158,6 +166,12 @@
 
         "SECTION_HEADER_ALL_CONNECTIONS"    : "All Connections",
         "SECTION_HEADER_RECENT_CONNECTIONS" : "Recent Connections"
+
+    },
+
+    "LIST" : {
+
+        "TEXT_ANONYMOUS_USER" : "Anonymous"
 
     },
 
@@ -234,10 +248,32 @@
 
     },
 
+    "MANAGE_SHARING_PROFILE" : {
+
+        "ACTION_ACKNOWLEDGE" : "@:APP.ACTION_ACKNOWLEDGE",
+        "ACTION_CANCEL"      : "@:APP.ACTION_CANCEL",
+        "ACTION_CLONE"       : "@:APP.ACTION_CLONE",
+        "ACTION_DELETE"      : "@:APP.ACTION_DELETE",
+        "ACTION_SAVE"        : "@:APP.ACTION_SAVE",
+
+        "DIALOG_HEADER_CONFIRM_DELETE" : "Delete Sharing Profile",
+        "DIALOG_HEADER_ERROR"          : "@:APP.DIALOG_HEADER_ERROR",
+
+        "FIELD_HEADER_NAME"               : "Name:",
+        "FIELD_HEADER_PRIMARY_CONNECTION" : "Primary Connection:",
+
+        "SECTION_HEADER_EDIT_SHARING_PROFILE" : "Edit Sharing Profile",
+        "SECTION_HEADER_PARAMETERS"           : "Parameters",
+
+        "TEXT_CONFIRM_DELETE" : "Sharing profiles cannot be restored after they have been deleted. Are you sure you want to delete this sharing profile?"
+
+    },
+
     "MANAGE_USER" : {
 
         "ACTION_ACKNOWLEDGE"   : "@:APP.ACTION_ACKNOWLEDGE",
         "ACTION_CANCEL"        : "@:APP.ACTION_CANCEL",
+        "ACTION_CLONE"         : "@:APP.ACTION_CLONE",
         "ACTION_DELETE"        : "@:APP.ACTION_DELETE",
         "ACTION_SAVE"          : "@:APP.ACTION_SAVE",
 
@@ -251,6 +287,7 @@
         "FIELD_HEADER_CREATE_NEW_USERS"              : "Create new users:",
         "FIELD_HEADER_CREATE_NEW_CONNECTIONS"        : "Create new connections:",
         "FIELD_HEADER_CREATE_NEW_CONNECTION_GROUPS"  : "Create new connection groups:",
+        "FIELD_HEADER_CREATE_NEW_SHARING_PROFILES"   : "Create new sharing profiles:",
         "FIELD_HEADER_PASSWORD"                      : "@:APP.FIELD_HEADER_PASSWORD",
         "FIELD_HEADER_PASSWORD_AGAIN"                : "@:APP.FIELD_HEADER_PASSWORD_AGAIN",
         "FIELD_HEADER_USERNAME"                      : "Username:",
@@ -274,11 +311,13 @@
         "FIELD_HEADER_CONSOLE"         : "Administrator console:",
         "FIELD_HEADER_CONSOLE_AUDIO"   : "Support audio in console:",
         "FIELD_HEADER_CREATE_DRIVE_PATH" : "Automatically create drive:",
+        "FIELD_HEADER_CREATE_RECORDING_PATH" : "Automatically create recording path:",
         "FIELD_HEADER_DISABLE_AUDIO"   : "Disable audio:",
         "FIELD_HEADER_DISABLE_AUTH"    : "Disable authentication:",
         "FIELD_HEADER_DOMAIN"          : "Domain:",
         "FIELD_HEADER_DPI"             : "Resolution (DPI):",
         "FIELD_HEADER_DRIVE_PATH"      : "Drive path:",
+        "FIELD_HEADER_ENABLE_AUDIO_INPUT"         : "Enable audio input (microphone):",
         "FIELD_HEADER_ENABLE_DESKTOP_COMPOSITION" : "Enable desktop composition (Aero):",
         "FIELD_HEADER_ENABLE_DRIVE"               : "Enable drive:",
         "FIELD_HEADER_ENABLE_FONT_SMOOTHING"      : "Enable font smoothing (ClearType):",
@@ -296,6 +335,10 @@
         "FIELD_HEADER_PORT"            : "Port:",
         "FIELD_HEADER_PRECONNECTION_BLOB" : "Preconnection BLOB (VM ID):",
         "FIELD_HEADER_PRECONNECTION_ID"   : "RDP source ID:",
+        "FIELD_HEADER_READ_ONLY"      : "Read-only:",
+        "FIELD_HEADER_RECORDING_NAME" : "Recording name:",
+        "FIELD_HEADER_RECORDING_PATH" : "Recording path:",
+        "FIELD_HEADER_RESIZE_METHOD" : "Resize method:",
         "FIELD_HEADER_REMOTE_APP_ARGS" : "Parameters:",
         "FIELD_HEADER_REMOTE_APP_DIR"  : "Working directory:",
         "FIELD_HEADER_REMOTE_APP"      : "Program:",
@@ -318,6 +361,10 @@
         "FIELD_OPTION_COLOR_DEPTH_8"     : "256 color",
         "FIELD_OPTION_COLOR_DEPTH_EMPTY" : "",
 
+        "FIELD_OPTION_RESIZE_METHOD_DISPLAY_UPDATE" : "\"Display Update\" virtual channel (RDP 8.1+)",
+        "FIELD_OPTION_RESIZE_METHOD_EMPTY"          : "",
+        "FIELD_OPTION_RESIZE_METHOD_RECONNECT"      : "Reconnect",
+
         "FIELD_OPTION_SECURITY_ANY"   : "Any",
         "FIELD_OPTION_SECURITY_EMPTY" : "",
         "FIELD_OPTION_SECURITY_NLA"   : "NLA (Network Level Authentication)",
@@ -330,6 +377,7 @@
         "FIELD_OPTION_SERVER_LAYOUT_FAILSAFE"     : "Unicode",
         "FIELD_OPTION_SERVER_LAYOUT_FR_FR_AZERTY" : "French (Azerty)",
         "FIELD_OPTION_SERVER_LAYOUT_IT_IT_QWERTY" : "Italian (Qwerty)",
+        "FIELD_OPTION_SERVER_LAYOUT_JA_JP_QWERTY" : "Japanese (Qwerty)",
         "FIELD_OPTION_SERVER_LAYOUT_SV_SE_QWERTY" : "Swedish (Qwerty)",
 
         "NAME" : "RDP",
@@ -341,6 +389,7 @@
         "SECTION_HEADER_NETWORK"            : "Network",
         "SECTION_HEADER_PERFORMANCE"        : "Performance",
         "SECTION_HEADER_PRECONNECTION_PDU"  : "Preconnection PDU / Hyper-V",
+        "SECTION_HEADER_RECORDING"          : "Screen Recording",
         "SECTION_HEADER_REMOTEAPP"          : "RemoteApp",
         "SECTION_HEADER_SFTP"               : "SFTP"
 
@@ -350,6 +399,8 @@
 
         "FIELD_HEADER_COLOR_SCHEME" : "Color scheme:",
         "FIELD_HEADER_COMMAND"     : "Execute command:",
+        "FIELD_HEADER_CREATE_RECORDING_PATH" : "Automatically create recording path:",
+        "FIELD_HEADER_CREATE_TYPESCRIPT_PATH" : "Automatically create typescript path:",
         "FIELD_HEADER_FONT_NAME"   : "Font name:",
         "FIELD_HEADER_FONT_SIZE"   : "Font size:",
         "FIELD_HEADER_ENABLE_SFTP" : "Enable SFTP:",
@@ -359,6 +410,11 @@
         "FIELD_HEADER_PASSPHRASE"  : "Passphrase:",
         "FIELD_HEADER_PORT"        : "Port:",
         "FIELD_HEADER_PRIVATE_KEY" : "Private key:",
+        "FIELD_HEADER_READ_ONLY"   : "Read-only:",
+        "FIELD_HEADER_RECORDING_NAME" : "Recording name:",
+        "FIELD_HEADER_RECORDING_PATH" : "Recording path:",
+        "FIELD_HEADER_TYPESCRIPT_NAME" : "Typescript name:",
+        "FIELD_HEADER_TYPESCRIPT_PATH" : "Typescript path:",
 
         "FIELD_OPTION_COLOR_SCHEME_BLACK_WHITE" : "Black on white",
         "FIELD_OPTION_COLOR_SCHEME_EMPTY"       : "",
@@ -387,7 +443,9 @@
         "SECTION_HEADER_AUTHENTICATION" : "Authentication",
         "SECTION_HEADER_DISPLAY"        : "Display",
         "SECTION_HEADER_NETWORK"        : "Network",
+        "SECTION_HEADER_RECORDING"      : "Screen Recording",
         "SECTION_HEADER_SESSION"        : "Session / Environment",
+        "SECTION_HEADER_TYPESCRIPT"     : "Typescript (Text Session Recording)",
         "SECTION_HEADER_SFTP"           : "SFTP"
 
     },
@@ -395,6 +453,8 @@
     "PROTOCOL_TELNET" : {
 
         "FIELD_HEADER_COLOR_SCHEME"   : "Color scheme:",
+        "FIELD_HEADER_CREATE_RECORDING_PATH" : "Automatically create recording path:",
+        "FIELD_HEADER_CREATE_TYPESCRIPT_PATH" : "Automatically create typescript path:",
         "FIELD_HEADER_FONT_NAME"      : "Font name:",
         "FIELD_HEADER_FONT_SIZE"      : "Font size:",
         "FIELD_HEADER_HOSTNAME"       : "Hostname:",
@@ -402,6 +462,11 @@
         "FIELD_HEADER_PASSWORD"       : "Password:",
         "FIELD_HEADER_PASSWORD_REGEX" : "Password regular expression:",
         "FIELD_HEADER_PORT"           : "Port:",
+        "FIELD_HEADER_READ_ONLY"      : "Read-only:",
+        "FIELD_HEADER_RECORDING_NAME" : "Recording name:",
+        "FIELD_HEADER_RECORDING_PATH" : "Recording path:",
+        "FIELD_HEADER_TYPESCRIPT_NAME" : "Typescript name:",
+        "FIELD_HEADER_TYPESCRIPT_PATH" : "Typescript path:",
 
         "FIELD_OPTION_COLOR_SCHEME_BLACK_WHITE" : "Black on white",
         "FIELD_OPTION_COLOR_SCHEME_EMPTY"       : "",
@@ -429,6 +494,8 @@
 
         "SECTION_HEADER_AUTHENTICATION" : "Authentication",
         "SECTION_HEADER_DISPLAY"        : "Display",
+        "SECTION_HEADER_RECORDING"      : "Screen Recording",
+        "SECTION_HEADER_TYPESCRIPT"     : "Typescript (Text Session Recording)",
         "SECTION_HEADER_NETWORK"        : "Network"
 
     },
@@ -438,6 +505,7 @@
         "FIELD_HEADER_AUDIO_SERVERNAME" : "Audio server name:",
         "FIELD_HEADER_CLIPBOARD_ENCODING" : "Encoding:",
         "FIELD_HEADER_COLOR_DEPTH"      : "Color depth:",
+        "FIELD_HEADER_CREATE_RECORDING_PATH" : "Automatically create recording path:",
         "FIELD_HEADER_CURSOR"           : "Cursor:",
         "FIELD_HEADER_DEST_HOST"        : "Destination host:",
         "FIELD_HEADER_DEST_PORT"        : "Destination port:",
@@ -447,6 +515,8 @@
         "FIELD_HEADER_PASSWORD"         : "Password:",
         "FIELD_HEADER_PORT"             : "Port:",
         "FIELD_HEADER_READ_ONLY"        : "Read-only:",
+        "FIELD_HEADER_RECORDING_NAME" : "Recording name:",
+        "FIELD_HEADER_RECORDING_PATH" : "Recording path:",
         "FIELD_HEADER_SFTP_DIRECTORY"   : "Default upload directory:",
         "FIELD_HEADER_SFTP_HOSTNAME"    : "Hostname:",
         "FIELD_HEADER_SFTP_PASSPHRASE"  : "Passphrase:",
@@ -479,6 +549,7 @@
         "SECTION_HEADER_CLIPBOARD"      : "Clipboard",
         "SECTION_HEADER_DISPLAY"        : "Display",
         "SECTION_HEADER_NETWORK"        : "Network",
+        "SECTION_HEADER_RECORDING"      : "Screen Recording",
         "SECTION_HEADER_REPEATER"       : "VNC Repeater",
         "SECTION_HEADER_SFTP"           : "SFTP"
 
@@ -517,6 +588,7 @@
         "ACTION_ACKNOWLEDGE"          : "@:APP.ACTION_ACKNOWLEDGE",
         "ACTION_NEW_CONNECTION"       : "New Connection",
         "ACTION_NEW_CONNECTION_GROUP" : "New Group",
+        "ACTION_NEW_SHARING_PROFILE"  : "New Sharing Profile",
 
         "DIALOG_HEADER_ERROR" : "@:APP.DIALOG_HEADER_ERROR",
 

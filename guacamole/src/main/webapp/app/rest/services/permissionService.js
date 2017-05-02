@@ -1,23 +1,20 @@
 /*
- * Copyright (C) 2014 Glyptodon LLC
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 /**
@@ -36,6 +33,45 @@ angular.module('rest').factory('permissionService', ['$injector',
     var PermissionPatch = $injector.get('PermissionPatch');
 
     var service = {};
+
+    /**
+     * Returns the URL for the REST resource most appropriate for accessing
+     * the permissions of the user having the given username.
+     * 
+     * It is important to note that a particular data source can authenticate
+     * and provide permissions for a user, even if that user does not exist
+     * within that data source (and thus cannot be found beneath
+     * "api/session/data/{dataSource}/users")
+     *
+     * @param {String} dataSource
+     *     The unique identifier of the data source containing the user whose
+     *     permissions should be retrieved. This identifier corresponds to an
+     *     AuthenticationProvider within the Guacamole web application.
+     *
+     * @param {String} username
+     *     The username of the user for which the URL of the proper REST
+     *     resource should be derived.
+     *
+     * @returns {String}
+     *     The URL for the REST resource representing the user having the given
+     *     username.
+     */
+    var getPermissionsResourceURL = function getPermissionsResourceURL(dataSource, username) {
+
+        // Create base URL for data source
+        var base = 'api/session/data/' + encodeURIComponent(dataSource);
+
+        // If the username is that of the current user, do not rely on the
+        // user actually existing (they may not). Access their permissions via
+        // "self" rather than the collection of defined users.
+        if (username === authenticationService.getCurrentUsername())
+            return base + '/self/permissions';
+
+        // Otherwise, the user must exist for their permissions to be
+        // accessible. Use the collection of defined users.
+        return base + '/users/' + encodeURIComponent(username) + '/permissions';
+
+    };
 
     /**
      * Makes a request to the REST API to get the list of permissions for a
@@ -65,7 +101,7 @@ angular.module('rest').factory('permissionService', ['$injector',
         return $http({
             cache   : cacheService.users,
             method  : 'GET',
-            url     : 'api/data/' + encodeURIComponent(dataSource) + '/users/' + encodeURIComponent(userID) + '/permissions',
+            url     : getPermissionsResourceURL(dataSource, userID),
             params  : httpParameters
         });
 
@@ -178,6 +214,10 @@ angular.module('rest').factory('permissionService', ['$injector',
         addObjectPatchOperations(patch, operation, "/connectionGroupPermissions",
             permissions.connectionGroupPermissions);
 
+        // Add sharing profile permission operations to patch
+        addObjectPatchOperations(patch, operation, "/sharingProfilePermissions",
+            permissions.sharingProfilePermissions);
+
         // Add active connection permission operations to patch
         addObjectPatchOperations(patch, operation, "/activeConnectionPermissions",
             permissions.activeConnectionPermissions);
@@ -238,7 +278,7 @@ angular.module('rest').factory('permissionService', ['$injector',
         // Patch user permissions
         return $http({
             method  : 'PATCH', 
-            url     : 'api/data/' + encodeURIComponent(dataSource) + '/users/' + encodeURIComponent(userID) + '/permissions',
+            url     : getPermissionsResourceURL(dataSource, userID),
             params  : httpParameters,
             data    : permissionPatch
         })

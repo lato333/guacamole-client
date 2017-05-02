@@ -38,7 +38,8 @@
 
         "INFO_ACTIVE_USER_COUNT" : "In Benutzung durch {USERS} Benutzer.",
 
-        "NAME" : "Guacamole ${project.version}",
+
+        "NAME" : "Anmeldung",
 
         "TEXT_HISTORY_DURATION" : "{VALUE} {UNIT, select, second{{VALUE, plural, one{Sekunde} other{Sekunden}}} minute{{VALUE, plural, one{Minute} other{Minuten}}} hour{{VALUE, plural, one{Stunde} other{Stunden}}} day{{VALUE, plural, one{Tag} other{Tage}}} other{}}"
 
@@ -234,10 +235,27 @@
 
     },
 
+    "MANAGE_SHARING_PROFILE" : {
+
+        "ACTION_ACKNOWLEDGE" : "@:APP.ACTION_ACKNOWLEDGE",
+        "ACTION_CANCEL"      : "@:APP.ACTION_CANCEL",
+        "ACTION_CLONE"       : "@:APP.ACTION_CLONE",
+        "ACTION_DELETE"      : "@:APP.ACTION_DELETE",
+        "ACTION_SAVE"        : "@:APP.ACTION_SAVE",
+
+        "DIALOG_HEADER_ERROR" : "@:APP.DIALOG_HEADER_ERROR",
+
+        "FIELD_HEADER_NAME" : "Name:",
+
+        "SECTION_HEADER_PARAMETERS" : "Parameter"
+
+    },
+
     "MANAGE_USER" : {
 
         "ACTION_ACKNOWLEDGE"   : "@:APP.ACTION_ACKNOWLEDGE",
         "ACTION_CANCEL"        : "@:APP.ACTION_CANCEL",
+        "ACTION_CLONE"         : "@:APP.ACTION_CLONE",
         "ACTION_DELETE"        : "@:APP.ACTION_DELETE",
         "ACTION_SAVE"          : "@:APP.ACTION_SAVE",
 
@@ -294,6 +312,7 @@
         "FIELD_HEADER_INITIAL_PROGRAM" : "Startprogramm:",
         "FIELD_HEADER_PASSWORD"        : "Passwort:",
         "FIELD_HEADER_PORT"            : "Port:",
+        "FIELD_HEADER_READ_ONLY"       : "Nur-Lesen:",
         "FIELD_HEADER_REMOTE_APP_ARGS" : "Parameter:",
         "FIELD_HEADER_REMOTE_APP_DIR"  : "Arbeitsverzeichnis:",
         "FIELD_HEADER_REMOTE_APP"      : "Programm:",
@@ -356,6 +375,7 @@
         "FIELD_HEADER_PASSPHRASE"  : "Passphrase:",
         "FIELD_HEADER_PORT"        : "Port:",
         "FIELD_HEADER_PRIVATE_KEY" : "Privater Schlüssel:",
+        "FIELD_HEADER_READ_ONLY"   : "Nur-Lesen:",
 
         "FIELD_OPTION_COLOR_SCHEME_BLACK_WHITE" : "Schwarz auf Weiß",
         "FIELD_OPTION_COLOR_SCHEME_EMPTY"       : "",
@@ -399,6 +419,7 @@
         "FIELD_HEADER_PASSWORD"       : "Passwort:",
         "FIELD_HEADER_PASSWORD_REGEX" : "Reguläre Passwortersetzungen:",
         "FIELD_HEADER_PORT"           : "Port:",
+        "FIELD_HEADER_READ_ONLY"      : "Nur-Lesen:",
 
         "FIELD_OPTION_COLOR_SCHEME_BLACK_WHITE" : "Schwarz auf Weiß",
         "FIELD_OPTION_COLOR_SCHEME_EMPTY"       : "",

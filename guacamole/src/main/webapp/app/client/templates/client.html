@@ -1,24 +1,3 @@
-<!--
-   Copyright (C) 2014 Glyptodon LLC
-
-   Permission is hereby granted, free of charge, to any person obtaining a copy
-   of this software and associated documentation files (the "Software"), to deal
-   in the Software without restriction, including without limitation the rights
-   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-   copies of the Software, and to permit persons to whom the Software is
-   furnished to do so, subject to the following conditions:
-
-   The above copyright notice and this permission notice shall be included in
-   all copies or substantial portions of the Software.
-
-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-   THE SOFTWARE.
--->
 
 <guac-viewport>
 
@@ -64,18 +43,41 @@
             <!-- Stationary header -->
             <div class="header">
                 <h2>{{client.name}}</h2>
+                <div class="share-menu" ng-show="canShareConnection()">
+                    <guac-menu menu-title="'CLIENT.ACTION_SHARE' | translate">
+                        <ul ng-repeat="sharingProfile in sharingProfiles">
+                            <li><a ng-click="share(sharingProfile)">{{sharingProfile.name}}</a></li>
+                        </ul>
+                    </guac-menu>
+                </div>
                 <guac-user-menu local-actions="clientMenuActions"></guac-user-menu>
             </div>
 
             <!-- Scrollable body -->
             <div class="menu-body" guac-touch-drag="menuDrag" guac-scroll="menu.scrollState">
 
+                <!-- Connection sharing -->
+                <div class="menu-section" id="share-links" ng-show="isShared()">
+                    <div class="content">
+                        <h3>{{'CLIENT.INFO_CONNECTION_SHARED' | translate}}</h3>
+                        <p class="description"
+                           translate="CLIENT.HELP_SHARE_LINK"
+                           translate-values="{LINKS : getShareLinkCount()}"></p>
+                        <table>
+                            <tr ng-repeat="link in client.shareLinks | orderBy: name">
+                                <th>{{link.name}}</th>
+                                <td><a href="{{link.href}}" target="_blank">{{link.href}}</a></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- Clipboard -->
                 <div class="menu-section" id="clipboard-settings">
                     <h3>{{'CLIENT.SECTION_HEADER_CLIPBOARD' | translate}}</h3>
                     <div class="content">
                         <p class="description">{{'CLIENT.HELP_CLIPBOARD' | translate}}</p>
-                        <textarea ng-model="client.clipboardData" rows="10" cols="40" id="clipboard"></textarea>
+                        <guac-clipboard data="client.clipboardData"></guac-clipboard>
                     </div>
                 </div>
 

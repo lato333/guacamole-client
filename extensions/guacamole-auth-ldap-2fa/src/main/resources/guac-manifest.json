@@ -1,12 +1,12 @@
 {
 
-    "guacamoleVersion" : "0.9.9",
+    "guacamoleVersion" : "0.9.11-incubating",
 
-    "name"      : "LDAP 2FA Authentication",
+    "name"      : "LDAP Two-Factor Authentication",
     "namespace" : "guac-ldap-2fa",
 
     "authProviders" : [
-        "net.sourceforge.guacamole.net.auth.ldap2fa.LDAPAuthenticationProvider"
+        "org.apache.guacamole.auth.ldap2fa.LDAPAuthenticationProvider"
     ],
 
     "translations" : [

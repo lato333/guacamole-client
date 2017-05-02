@@ -1,23 +1,20 @@
 /*
- * Copyright (C) 2014 Glyptodon LLC
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 /**
@@ -56,6 +53,15 @@ angular.module('rest').factory('PermissionSet', [function definePermissionSet() 
          * @type Object.<String, String[]>
          */
         this.connectionGroupPermissions = template.connectionGroupPermissions || {};
+
+        /**
+         * Map of sharing profile identifiers to the corresponding array of
+         * granted permissions. Each permission is represented by a string
+         * listed within PermissionSet.ObjectPermissionType.
+         *
+         * @type Object.<String, String[]>
+         */
+        this.sharingProfilePermissions = template.sharingProfilePermissions || {};
         
         /**
          * Map of active connection identifiers to the corresponding array of
@@ -135,7 +141,12 @@ angular.module('rest').factory('PermissionSet', [function definePermissionSet() 
         /**
          * Permission to create new connection groups.
          */
-        CREATE_CONNECTION_GROUP : "CREATE_CONNECTION_GROUP"
+        CREATE_CONNECTION_GROUP : "CREATE_CONNECTION_GROUP",
+
+        /**
+         * Permission to create new sharing profiles.
+         */
+        CREATE_SHARING_PROFILE : "CREATE_SHARING_PROFILE"
 
     };
 
@@ -248,6 +259,28 @@ angular.module('rest').factory('PermissionSet', [function definePermissionSet() 
      */
     PermissionSet.hasConnectionGroupPermission = function hasConnectionGroupPermission(permSet, type, identifier) {
         return hasPermission(permSet.connectionGroupPermissions, type, identifier);
+    };
+
+    /**
+     * Returns whether the given permission is granted for the sharing profile
+     * having the given ID.
+     *
+     * @param {PermissionSet|Object} permSet
+     *     The permission set to check.
+     *
+     * @param {String} type
+     *     The permission to search for, as defined by
+     *     PermissionSet.ObjectPermissionType.
+     *
+     * @param {String} identifier
+     *     The identifier of the sharing profile to which the permission
+     *     applies.
+     *
+     * @returns {Boolean}
+     *     true if the permission is present (granted), false otherwise.
+     */
+    PermissionSet.hasSharingProfilePermission = function hasSharingProfilePermission(permSet, type, identifier) {
+        return hasPermission(permSet.sharingProfilePermissions, type, identifier);
     };
 
     /**
@@ -549,6 +582,56 @@ angular.module('rest').factory('PermissionSet', [function definePermissionSet() 
     PermissionSet.removeConnectionGroupPermission = function removeConnectionGroupPermission(permSet, type, identifier) {
         permSet.connectionGroupPermissions = permSet.connectionGroupPermissions || {};
         return removeObjectPermission(permSet.connectionGroupPermissions, type, identifier);
+    };
+
+    /**
+     * Adds the given sharing profile permission applying to the sharing profile
+     * with the given ID to the given permission set, if not already present. If
+     * the permission is already present, this function has no effect.
+     *
+     * @param {PermissionSet} permSet
+     *     The permission set to modify.
+     *
+     * @param {String} type
+     *     The permission to add, as defined by
+     *     PermissionSet.ObjectPermissionType.
+     *
+     * @param {String} identifier
+     *     The identifier of the sharing profile to which the permission
+     *     applies.
+     *
+     * @returns {Boolean}
+     *     true if the permission was added, false if the permission was
+     *     already present in the given permission set.
+     */
+    PermissionSet.addSharingProfilePermission = function addSharingProfilePermission(permSet, type, identifier) {
+        permSet.sharingProfilePermissions = permSet.sharingProfilePermissions || {};
+        return addObjectPermission(permSet.sharingProfilePermissions, type, identifier);
+    };
+
+    /**
+     * Removes the given sharing profile permission applying to the sharing
+     * profile with the given ID from the given permission set, if present. If
+     * the permission is not present, this function has no effect.
+     *
+     * @param {PermissionSet} permSet
+     *     The permission set to modify.
+     *
+     * @param {String} type
+     *     The permission to remove, as defined by
+     *     PermissionSet.ObjectPermissionType.
+     *
+     * @param {String} identifier
+     *     The identifier of the sharing profile to which the permission
+     *     applies.
+     *
+     * @returns {Boolean}
+     *     true if the permission was removed, false if the permission was not
+     *     present in the given permission set.
+     */
+    PermissionSet.removeSharingProfilePermission = function removeSharingProfilePermission(permSet, type, identifier) {
+        permSet.sharingProfilePermissions = permSet.sharingProfilePermissions || {};
+        return removeObjectPermission(permSet.sharingProfilePermissions, type, identifier);
     };
 
     /**

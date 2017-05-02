@@ -1,23 +1,20 @@
 /*
- * Copyright (C) 2015 Glyptodon LLC
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 /**
@@ -81,12 +78,32 @@ angular.module('manage').controller('manageUserController', ['$scope', '$injecto
     var selectedDataSource = $routeParams.dataSource;
 
     /**
+     * The username of the original user from which this user is
+     * being cloned. Only valid if this is a new user.
+     *
+     * @type String
+     */
+    var cloneSourceUsername = $location.search().clone;
+
+    /**
      * The username of the user being edited. If a new user is
      * being created, this will not be defined.
      *
      * @type String
      */
     var username = $routeParams.id;
+
+    /**
+     * The string value representing the user currently being edited within the
+     * permission flag set. Note that his may not match the user's actual
+     * username - it is a marker that is (1) guaranteed to be associated with
+     * the current user's permissions in the permission set and (2) guaranteed
+     * not to collide with any user that does not represent the current user
+     * within the permission set.
+     *
+     * @type String
+     */
+    $scope.selfUsername = '';
 
     /**
      * All user accounts associated with the same username as the account being
@@ -363,6 +380,42 @@ angular.module('manage').controller('manageUserController', ['$scope', '$injecto
     };
 
     /**
+     * Returns whether the current user can clone the user being edited within
+     * the given data source.
+     *
+     * @param {String} [dataSource]
+     *     The identifier of the data source to check. If omitted, this will
+     *     default to the currently-selected data source.
+     *
+     * @returns {Boolean}
+     *     true if the current user can clone the user being edited, false
+     *     otherwise.
+     */
+    $scope.canCloneUser = function canCloneUser(dataSource) {
+
+        // Do not check if permissions are not yet loaded
+        if (!$scope.permissions)
+            return false;
+
+        // Use currently-selected data source if unspecified
+        dataSource = dataSource || selectedDataSource;
+
+        // If we are not editing an existing user, we cannot clone
+        if (!$scope.userExists(selectedDataSource))
+            return false;
+
+        // The administrator can always clone users
+        if (PermissionSet.hasSystemPermission($scope.permissions[dataSource],
+                PermissionSet.SystemPermissionType.ADMINISTER))
+            return true;
+
+        // Otherwise we need explicit CREATE_USER permission
+        return PermissionSet.hasSystemPermission($scope.permissions[dataSource],
+            PermissionSet.SystemPermissionType.CREATE_USER);
+
+    };
+
+    /**
      * Returns whether the current user can delete the user being edited from
      * the given data source.
      *
@@ -436,6 +489,10 @@ angular.module('manage').controller('manageUserController', ['$scope', '$injecto
             if (!linked && readOnly)
                 return;
 
+            // Only the selected data source is relevant when cloning
+            if (cloneSourceUsername && dataSource !== selectedDataSource)
+                return;
+
             // Determine class name based on read-only / linked status
             var className;
             if (readOnly)    className = 'read-only';
@@ -477,9 +534,42 @@ angular.module('manage').controller('manageUserController', ['$scope', '$injecto
 
         });
 
+        // The current user will be associated with username of the existing
+        // user in the retrieved permission set
+        $scope.selfUsername = username;
+
         // Pull user permissions
         permissionService.getPermissions(selectedDataSource, username).success(function gotPermissions(permissions) {
             $scope.permissionFlags = PermissionFlagSet.fromPermissionSet(permissions);
+        })
+
+        // If permissions cannot be retrieved, use empty permissions
+        .error(function permissionRetrievalFailed() {
+            $scope.permissionFlags = new PermissionFlagSet();
+        });
+    }
+
+    // If we are cloning an existing user, pull his/her data instead
+    else if (cloneSourceUsername) {
+
+        dataSourceService.apply(userService.getUser, dataSources, cloneSourceUsername)
+        .then(function usersReceived(users) {
+
+            // Get user for currently-selected data source
+            $scope.users = {};
+            $scope.user  = users[selectedDataSource];
+
+        });
+
+        // The current user will be associated with cloneSourceUsername in the
+        // retrieved permission set
+        $scope.selfUsername = cloneSourceUsername;
+
+        // Pull user permissions
+        permissionService.getPermissions(selectedDataSource, cloneSourceUsername)
+        .success(function gotPermissions(permissions) {
+            $scope.permissionFlags = PermissionFlagSet.fromPermissionSet(permissions);
+            permissionsAdded = permissions;
         })
 
         // If permissions cannot be retrieved, use empty permissions
@@ -543,6 +633,10 @@ angular.module('manage').controller('manageUserController', ['$scope', '$injecto
         {
             label: "MANAGE_USER.FIELD_HEADER_CREATE_NEW_CONNECTION_GROUPS",
             value: PermissionSet.SystemPermissionType.CREATE_CONNECTION_GROUP
+        },
+        {
+            label: "MANAGE_USER.FIELD_HEADER_CREATE_NEW_SHARING_PROFILES",
+            value: PermissionSet.SystemPermissionType.CREATE_SHARING_PROFILE
         }
     ];
 
@@ -615,10 +709,10 @@ angular.module('manage').controller('manageUserController', ['$scope', '$injecto
     $scope.systemPermissionChanged = function systemPermissionChanged(type) {
 
         // Determine current permission setting
-        var value = $scope.permissionFlags.systemPermissions[type];
+        var granted = $scope.permissionFlags.systemPermissions[type];
 
         // Add/remove permission depending on flag state
-        if (value)
+        if (granted)
             addSystemPermission(type);
         else
             removeSystemPermission(type);
@@ -685,10 +779,10 @@ angular.module('manage').controller('manageUserController', ['$scope', '$injecto
     $scope.userPermissionChanged = function userPermissionChanged(type, identifier) {
 
         // Determine current permission setting
-        var value = $scope.permissionFlags.userPermissions[type][identifier];
+        var granted = $scope.permissionFlags.userPermissions[type][identifier];
 
         // Add/remove permission depending on flag state
-        if (value)
+        if (granted)
             addUserPermission(type, identifier);
         else
             removeUserPermission(type, identifier);
@@ -771,6 +865,45 @@ angular.module('manage').controller('manageUserController', ['$scope', '$injecto
 
     };
 
+    /**
+     * Updates the permissionsAdded and permissionsRemoved permission sets to
+     * reflect the addition of the given sharing profile permission.
+     *
+     * @param {String} identifier
+     *     The identifier of the sharing profile to add READ permission for.
+     */
+    var addSharingProfilePermission = function addSharingProfilePermission(identifier) {
+
+        // If permission was previously removed, simply un-remove it
+        if (PermissionSet.hasSharingProfilePermission(permissionsRemoved, PermissionSet.ObjectPermissionType.READ, identifier))
+            PermissionSet.removeSharingProfilePermission(permissionsRemoved, PermissionSet.ObjectPermissionType.READ, identifier);
+
+        // Otherwise, explicitly add the permission
+        else
+            PermissionSet.addSharingProfilePermission(permissionsAdded, PermissionSet.ObjectPermissionType.READ, identifier);
+
+    };
+
+    /**
+     * Updates the permissionsAdded and permissionsRemoved permission sets to
+     * reflect the removal of the given sharing profile permission.
+     *
+     * @param {String} identifier
+     *     The identifier of the sharing profile to remove READ permission for.
+     */
+    var removeSharingProfilePermission = function removeSharingProfilePermission(identifier) {
+
+        // If permission was previously added, simply un-add it
+        if (PermissionSet.hasSharingProfilePermission(permissionsAdded, PermissionSet.ObjectPermissionType.READ, identifier))
+            PermissionSet.removeSharingProfilePermission(permissionsAdded, PermissionSet.ObjectPermissionType.READ, identifier);
+
+        // Otherwise, explicitly remove the permission
+        else
+            PermissionSet.addSharingProfilePermission(permissionsRemoved, PermissionSet.ObjectPermissionType.READ, identifier);
+
+    };
+
+
     // Expose permission query and modification functions to group list template
     $scope.groupListContext = {
 
@@ -798,10 +931,10 @@ angular.module('manage').controller('manageUserController', ['$scope', '$injecto
         connectionPermissionChanged : function connectionPermissionChanged(identifier) {
 
             // Determine current permission setting
-            var value = $scope.permissionFlags.connectionPermissions.READ[identifier];
+            var granted = $scope.permissionFlags.connectionPermissions.READ[identifier];
 
             // Add/remove permission depending on flag state
-            if (value)
+            if (granted)
                 addConnectionPermission(identifier);
             else
                 removeConnectionPermission(identifier);
@@ -820,13 +953,35 @@ angular.module('manage').controller('manageUserController', ['$scope', '$injecto
         connectionGroupPermissionChanged : function connectionGroupPermissionChanged(identifier) {
 
             // Determine current permission setting
-            var value = $scope.permissionFlags.connectionGroupPermissions.READ[identifier];
+            var granted = $scope.permissionFlags.connectionGroupPermissions.READ[identifier];
 
             // Add/remove permission depending on flag state
-            if (value)
+            if (granted)
                 addConnectionGroupPermission(identifier);
             else
                 removeConnectionGroupPermission(identifier);
+
+        },
+
+        /**
+         * Notifies the controller that a change has been made to the given
+         * sharing profile permission for the user being edited. This only
+         * applies to READ permissions.
+         *
+         * @param {String} identifier
+         *     The identifier of the sharing profile affected by the changed
+         *     permission.
+         */
+        sharingProfilePermissionChanged : function sharingProfilePermissionChanged(identifier) {
+
+            // Determine current permission setting
+            var granted = $scope.permissionFlags.sharingProfilePermissions.READ[identifier];
+
+            // Add/remove permission depending on flag state
+            if (granted)
+                addSharingProfilePermission(identifier);
+            else
+                removeSharingProfilePermission(identifier);
 
         }
 
@@ -836,7 +991,15 @@ angular.module('manage').controller('manageUserController', ['$scope', '$injecto
      * Cancels all pending edits, returning to the management page.
      */
     $scope.cancel = function cancel() {
-        $location.path('/settings/users');
+        $location.url('/settings/users');
+    };
+
+    /**
+     * Cancels all pending edits, opening an edit page for a new user
+     * which is prepopulated with the data from the user currently being edited.
+     */
+    $scope.cloneUser = function cloneUser() {
+        $location.path('/manage/' + encodeURIComponent(selectedDataSource) + '/users').search('clone', username);
     };
             
     /**
@@ -849,7 +1012,9 @@ angular.module('manage').controller('manageUserController', ['$scope', '$injecto
             guacNotification.showStatus({
                 'className'  : 'error',
                 'title'      : 'MANAGE_USER.DIALOG_HEADER_ERROR',
-                'text'       : 'MANAGE_USER.ERROR_PASSWORD_MISMATCH',
+                'text'       : {
+                    key : 'MANAGE_USER.ERROR_PASSWORD_MISMATCH'
+                },
                 'actions'    : [ ACKNOWLEDGE_ACTION ]
             });
             return;
@@ -864,10 +1029,27 @@ angular.module('manage').controller('manageUserController', ['$scope', '$injecto
 
         saveUserPromise.success(function savedUser() {
 
+            // Move permission flags if username differs from marker
+            if ($scope.selfUsername !== $scope.user.username) {
+
+                // Rename added permission
+                if (permissionsAdded.userPermissions[$scope.selfUsername]) {
+                    permissionsAdded.userPermissions[$scope.user.username] = permissionsAdded.userPermissions[$scope.selfUsername];
+                    delete permissionsAdded.userPermissions[$scope.selfUsername];
+                }
+
+                // Rename removed permission
+                if (permissionsRemoved.userPermissions[$scope.selfUsername]) {
+                    permissionsRemoved.userPermissions[$scope.user.username] = permissionsRemoved.userPermissions[$scope.selfUsername];
+                    delete permissionsRemoved.userPermissions[$scope.selfUsername];
+                }
+                
+            }
+
             // Upon success, save any changed permissions
             permissionService.patchPermissions(selectedDataSource, $scope.user.username, permissionsAdded, permissionsRemoved)
             .success(function patchedUserPermissions() {
-                $location.path('/settings/users');
+                $location.url('/settings/users');
             })
 
             // Notify of any errors
@@ -875,7 +1057,8 @@ angular.module('manage').controller('manageUserController', ['$scope', '$injecto
                 guacNotification.showStatus({
                     'className'  : 'error',
                     'title'      : 'MANAGE_USER.DIALOG_HEADER_ERROR',
-                    'text'       : error.message,
+                    'text'       : error.translatableMessage,
+                    'values'     : error.translationValues,
                     'actions'    : [ ACKNOWLEDGE_ACTION ]
                 });
             });
@@ -887,7 +1070,7 @@ angular.module('manage').controller('manageUserController', ['$scope', '$injecto
             guacNotification.showStatus({
                 'className'  : 'error',
                 'title'      : 'MANAGE_USER.DIALOG_HEADER_ERROR',
-                'text'       : error.message,
+                'text'       : error.translatableMessage,
                 'actions'    : [ ACKNOWLEDGE_ACTION ]
             });
         });
@@ -937,7 +1120,7 @@ angular.module('manage').controller('manageUserController', ['$scope', '$injecto
             guacNotification.showStatus({
                 'className'  : 'error',
                 'title'      : 'MANAGE_USER.DIALOG_HEADER_ERROR',
-                'text'       : error.message,
+                'text'       : error.translatableMessage,
                 'actions'    : [ ACKNOWLEDGE_ACTION ]
             });
         });
@@ -953,7 +1136,9 @@ angular.module('manage').controller('manageUserController', ['$scope', '$injecto
         // Confirm deletion request
         guacNotification.showStatus({
             'title'      : 'MANAGE_USER.DIALOG_HEADER_CONFIRM_DELETE',
-            'text'       : 'MANAGE_USER.TEXT_CONFIRM_DELETE',
+            'text'       : {
+                key : 'MANAGE_USER.TEXT_CONFIRM_DELETE'
+            },
             'actions'    : [ DELETE_ACTION, CANCEL_ACTION]
         });
 

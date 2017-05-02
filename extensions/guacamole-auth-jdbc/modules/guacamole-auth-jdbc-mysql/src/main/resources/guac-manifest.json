@@ -1,12 +1,21 @@
 {
 
-    "guacamoleVersion" : "0.9.9",
+    "guacamoleVersion" : "0.9.11-incubating",
 
     "name"      : "MySQL Authentication",
     "namespace" : "guac-mysql",
 
     "authProviders" : [
-        "net.sourceforge.guacamole.net.auth.mysql.MySQLAuthenticationProvider"
+        "org.apache.guacamole.auth.mysql.MySQLAuthenticationProvider",
+        "org.apache.guacamole.auth.mysql.MySQLSharedAuthenticationProvider"
+    ],
+
+    "css" : [
+        "styles/jdbc.css"
+    ],
+
+    "html" : [
+        "html/shared-connection.html"
     ],
 
     "translations" : [

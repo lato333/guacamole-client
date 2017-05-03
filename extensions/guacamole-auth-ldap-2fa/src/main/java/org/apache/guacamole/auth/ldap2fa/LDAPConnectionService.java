@@ -159,7 +159,7 @@ public class LDAPConnectionService {
 
         // Disconnect if an error occurs during bind
         catch (LDAPException e) {
-            logger.debug("LDAP bind failed.", e);
+            logger.error("LDAP bind failed for User " + userDN + ": ", e.getLDAPErrorMessage());
             disconnect(ldapConnection);
             return null;
         }

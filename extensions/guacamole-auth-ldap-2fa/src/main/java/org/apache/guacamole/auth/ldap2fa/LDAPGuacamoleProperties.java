@@ -154,5 +154,20 @@ public class LDAPGuacamoleProperties {
         public String getName() { return "ldap-max-search-results"; }
 
     };
+    
+
+	
+	/**
+	 * Filter User belonging to particular group
+	 */
+	public static final StringGuacamoleProperty LDAP_USER_FILTER = new StringGuacamoleProperty() {
+
+		@Override
+		public String getName() {
+			return "ldap-user-filter";
+		}
+
+	};
+
 
 }

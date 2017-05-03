@@ -67,7 +67,7 @@ public class LDAPAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public String getIdentifier() {
-        return "ldap";
+        return "ldap2fa";
     }
 
     @Override

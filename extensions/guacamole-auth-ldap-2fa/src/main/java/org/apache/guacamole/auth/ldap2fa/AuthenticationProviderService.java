@@ -173,20 +173,20 @@ public class AuthenticationProviderService {
 
         // Require username
         if (username == null || username.isEmpty()) {
-            logger.debug("Anonymous bind is not currently allowed by the LDAP authentication provider.");
+            logger.error("Anonymous bind is not currently allowed by the LDAP authentication provider.");
             return null;
         }
 
         // Require password, and do not allow anonymous binding
         if (password == null || password.isEmpty()) {
-            logger.debug("Anonymous bind is not currently allowed by the LDAP authentication provider.");
+            logger.error("Anonymous bind is not currently allowed by the LDAP authentication provider.");
             return null;
         }
 
         // Determine user DN
         String userDN = getUserBindDN(username);
         if (userDN == null) {
-            logger.debug("Unable to determine DN for user \"{}\".", username);
+            logger.error("Unable to determine DN for user \"{}\".", username);
             return null;
         }
 

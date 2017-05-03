@@ -865,7 +865,7 @@ Guacamole.Client = function(tunnel) {
 
                 // Remove from parent
                 var layer = getLayer(layer_index);
-                layer.dispose();
+                display.dispose(layer);
 
                 // Delete reference
                 delete layers[layer_index];
@@ -893,7 +893,7 @@ Guacamole.Client = function(tunnel) {
             // Only valid for visible layers (not buffers)
             if (layer_index >= 0) {
                 var layer = getLayer(layer_index);
-                layer.distort(a, b, c, d, e, f);
+                display.distort(layer, a, b, c, d, e, f);
             }
 
         },
@@ -1037,6 +1037,17 @@ Guacamole.Client = function(tunnel) {
 
         },
 
+        "mouse" : function handleMouse(parameters) {
+
+            var x = parseInt(parameters[0]);
+            var y = parseInt(parameters[1]);
+
+            // Display and move software cursor to received coordinates
+            display.showCursor(true);
+            display.moveCursor(x, y);
+
+        },
+
         "move": function(parameters) {
             
             var layer_index = parseInt(parameters[0]);
@@ -1049,7 +1060,7 @@ Guacamole.Client = function(tunnel) {
             if (layer_index > 0 && parent_index >= 0) {
                 var layer = getLayer(layer_index);
                 var parent = getLayer(parent_index);
-                layer.move(parent, x, y, z);
+                display.move(layer, parent, x, y, z);
             }
 
         },
@@ -1151,7 +1162,7 @@ Guacamole.Client = function(tunnel) {
             // Only valid for visible layers (not buffers)
             if (layer_index >= 0) {
                 var layer = getLayer(layer_index);
-                layer.shade(a);
+                display.shade(layer, a);
             }
 
         },
@@ -1346,7 +1357,7 @@ Guacamole.Client = function(tunnel) {
 
         // Ping every 5 seconds (ensure connection alive)
         pingInterval = window.setInterval(function() {
-            tunnel.sendMessage("sync", currentTimestamp);
+            tunnel.sendMessage("nop");
         }, 5000);
 
         setState(STATE_WAITING);

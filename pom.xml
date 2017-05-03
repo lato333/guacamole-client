@@ -26,7 +26,7 @@
     <groupId>org.apache.guacamole</groupId>
     <artifactId>guacamole-client</artifactId>
     <packaging>pom</packaging>
-    <version>0.9.11-incubating</version>
+    <version>0.9.12-incubating</version>
     <name>guacamole-client</name>
     <url>http://guacamole.incubator.apache.org/</url>
 
@@ -50,6 +50,7 @@
 
         <!-- Authentication extensions -->
         <module>extensions/guacamole-auth-duo</module>
+        <module>extensions/guacamole-auth-header</module>
         <module>extensions/guacamole-auth-jdbc</module>
         <module>extensions/guacamole-auth-ldap</module>
 		<module>extensions/guacamole-auth-ldap-2fa</module>

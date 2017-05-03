@@ -26,7 +26,7 @@
     <groupId>org.apache.guacamole</groupId>
     <artifactId>guacamole-auth-ldap2fa</artifactId>
     <packaging>jar</packaging>
-    <version>0.9.11-incubating</version>
+    <version>0.9.12-incubating</version>
     <name>guacamole-auth-ldap2fa</name>
     <url>http://guacamole.incubator.apache.org/</url>
 
@@ -126,19 +126,11 @@
 
     <dependencies>
 
-        <!-- Guacamole Java API -->
-        <dependency>
-            <groupId>org.apache.guacamole</groupId>
-            <artifactId>guacamole-common</artifactId>
-            <version>0.9.10-incubating</version>
-            <scope>provided</scope>
-        </dependency>
-
         <!-- Guacamole Extension API -->
         <dependency>
             <groupId>org.apache.guacamole</groupId>
             <artifactId>guacamole-ext</artifactId>
-            <version>0.9.11-incubating</version>
+            <version>0.9.12-incubating</version>
             <scope>provided</scope>
         </dependency>
 
@@ -160,12 +152,11 @@
             <artifactId>guice-multibindings</artifactId>
             <version>3.0</version>
         </dependency>
-        
-		<!-- Google Authenticator -->       
+	<!-- Google Authenticator -->       
 		<dependency>
   			<groupId>com.warrenstrange</groupId>
   			<artifactId>googleauth</artifactId>
-  			<version>0.5.0</version>
+  			<version>1.1.1</version>
 		</dependency>
     </dependencies>
 

@@ -157,7 +157,7 @@ angular.module('rest').factory('tunnelService', ['$injector',
      *     The sanitized filename.
      */
     var sanitizeFilename = function sanitizeFilename(filename) {
-        return filename.replace(/\/+/g, '_');
+        return filename.replace(/[\\\/]+/g, '_');
     };
 
     /**
@@ -213,6 +213,11 @@ angular.module('rest').factory('tunnelService', ['$injector',
         // browser supports tracking of iframe downloads via the "load" event
         iframe.onload = function downloadComplete() {
             document.body.removeChild(iframe);
+        };
+
+        // Acknowledge (and ignore) any received blobs
+        stream.onblob = function acknowledgeData() {
+            stream.sendAck('OK', Guacamole.Status.Code.SUCCESS);
         };
 
         // Automatically remove iframe from DOM a few seconds after the stream

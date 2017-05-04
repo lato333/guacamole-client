@@ -108,7 +108,7 @@ public class UserService {
             LDAPSearchResults results = ldapConnection.search(
                 confService.getUserBaseDN(),
                 LDAPConnection.SCOPE_SUB,
-                "(&(objectClass=*)(" + escapingService.escapeLDAPSearchFilter(usernameAttribute) + "=*))",
+                searchFilter,
                 null,
                 false,
                 constraints

@@ -47,8 +47,6 @@ import org.slf4j.LoggerFactory;
 /**
  * An LDAP-specific implementation of UserContext which queries all Guacamole
  * connections and users from the LDAP directory.
- *
- * @author Michael Jumper
  */
 public class UserContext implements org.apache.guacamole.net.auth.UserContext {
 
@@ -159,6 +157,11 @@ public class UserContext implements org.apache.guacamole.net.auth.UserContext {
     @Override
     public User self() {
         return self;
+    }
+
+    @Override
+    public String getResource() {
+        return null;
     }
 
     @Override

@@ -27,8 +27,6 @@ import org.apache.guacamole.properties.StringGuacamoleProperty;
  * Provides properties required for use of the LDAP authentication provider.
  * These properties will be read from guacamole.properties when the LDAP
  * authentication provider is used.
- *
- * @author Michael Jumper
  */
 public class LDAPGuacamoleProperties {
 
@@ -152,6 +150,27 @@ public class LDAPGuacamoleProperties {
 
         @Override
         public String getName() { return "ldap-max-search-results"; }
+
+    };
+
+    /**
+     * Property that controls whether or not the LDAP connection follows
+     * (dereferences) aliases as it searches the tree.
+     */
+    public static final DereferenceAliasesProperty LDAP_DEREFERENCE_ALIASES = new DereferenceAliasesProperty() {
+
+        @Override
+        public String getName() { return "ldap-dereference-aliases"; }
+
+    };
+
+    /**
+     * A search filter to apply to user LDAP queries.
+     */
+    public static final StringGuacamoleProperty LDAP_USER_SEARCH_FILTER = new StringGuacamoleProperty() {
+
+        @Override
+        public String getName() { return "ldap-user-search-filter"; }
 
     };
 

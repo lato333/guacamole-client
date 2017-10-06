@@ -50,6 +50,15 @@ CREATE TYPE guacamole_system_permission_type AS ENUM(
 );
 
 --
+-- Guacamole proxy (guacd) encryption methods
+--
+
+CREATE TYPE guacamole_proxy_encryption_method AS ENUM(
+    'NONE',
+    'SSL'
+);
+
+--
 -- Table of connection groups. Each connection group has a name.
 --
 
@@ -96,6 +105,11 @@ CREATE TABLE guacamole_connection (
   -- Concurrency limits
   max_connections          integer,
   max_connections_per_user integer,
+
+  -- Guacamole proxy (guacd) overrides
+  proxy_port              integer,
+  proxy_hostname          varchar(512),
+  proxy_encryption_method guacamole_proxy_encryption_method,
 
   PRIMARY KEY (connection_id),
 
@@ -147,6 +161,13 @@ CREATE TABLE guacamole_user (
   -- 2FA via google authenticator
   gauth_enabled boolean NOT NULL DEFAULT FALSE,
   secret_key varchar(128),
+
+  -- Profile information
+  full_name           varchar(256),
+  email_address       varchar(256),
+  organization        varchar(256),
+  organizational_role varchar(256),
+
 
   PRIMARY KEY (user_id),
 

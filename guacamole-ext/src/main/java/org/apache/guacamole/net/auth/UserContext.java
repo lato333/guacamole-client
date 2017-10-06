@@ -26,8 +26,6 @@ import org.apache.guacamole.form.Form;
 /**
  * The context of an active user. The functions of this class enforce all
  * permissions and act only within the rights of the associated user.
- *
- * @author Michael Jumper
  */
 public interface UserContext {
 
@@ -39,6 +37,29 @@ public interface UserContext {
      *         UserContext.
      */
     User self();
+
+    /**
+     * Returns an arbitrary REST resource representing this UserContext. The
+     * REST resource returned must be properly annotated with JSR-311
+     * annotations, and may serve as the root resource for any number of
+     * subresources. The returned resource is ultimately exposed at
+     * ".../api/session/ext/IDENTIFIER/", where IDENTIFIER is the identifier of
+     * the AuthenticationProvider associated with this UserContext.
+     *
+     * REST resources returned by this function will only be reachable by
+     * authenticated users with valid authentication tokens. REST resources
+     * which should be accessible by all users regardless of whether they have
+     * authenticated should instead be returned from
+     * AuthenticationProvider.getResource().
+     *
+     * @return
+     *     An arbitrary REST resource, annotated with JSR-311 annotations, or
+     *     null if no such resource is defined.
+     *
+     * @throws GuacamoleException
+     *     If the REST resource cannot be returned due to an error.
+     */
+    Object getResource() throws GuacamoleException;
 
     /**
      * Returns the AuthenticationProvider which created this UserContext, which

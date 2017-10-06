@@ -32,8 +32,6 @@ import org.apache.guacamole.net.auth.UserContext;
  * arbitrary external HTTP header. No storage for connections is
  * provided - only authentication. Storage must be provided by some other
  * extension.
- *
- * @author Nick Couchman
  */
 public class HTTPHeaderAuthenticationProvider implements AuthenticationProvider {
 
@@ -63,6 +61,11 @@ public class HTTPHeaderAuthenticationProvider implements AuthenticationProvider 
     @Override
     public String getIdentifier() {
         return "header";
+    }
+
+    @Override
+    public Object getResource() {
+        return null;
     }
 
     @Override

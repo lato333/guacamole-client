@@ -39,8 +39,6 @@ import org.apache.guacamole.protocol.ConfiguredGuacamoleSocket;
  * A connection record implementation that describes an active connection. As
  * the associated connection has not yet ended, getEndDate() will always return
  * null. The associated start date will be the time of this objects creation.
- *
- * @author Michael Jumper
  */
 public class ActiveConnectionRecord implements ConnectionRecord {
 
@@ -368,13 +366,17 @@ public class ActiveConnectionRecord implements ConnectionRecord {
      * given socket.
      *
      * @param socket
-     *     The ConfiguredGuacamoleSocket to use to create the tunnel associated
-     *     with this connection record.
-     * 
+     *     The GuacamoleSocket to use to create the tunnel associated with this
+     *     connection record.
+     *
+     * @param connectionID
+     *     The connection ID assigned to this connection by guacd.
+     *
      * @return
      *     The newly-created tunnel associated with this connection record.
      */
-    public GuacamoleTunnel assignGuacamoleTunnel(final ConfiguredGuacamoleSocket socket) {
+    public GuacamoleTunnel assignGuacamoleTunnel(final GuacamoleSocket socket,
+            String connectionID) {
 
         // Create tunnel with given socket
         this.tunnel = new AbstractGuacamoleTunnel() {
@@ -393,7 +395,7 @@ public class ActiveConnectionRecord implements ConnectionRecord {
 
         // Store connection ID of the primary connection only
         if (isPrimaryConnection())
-            this.connectionID = socket.getConnectionID();
+            this.connectionID = connectionID;
 
         // Return newly-created tunnel
         return this.tunnel;

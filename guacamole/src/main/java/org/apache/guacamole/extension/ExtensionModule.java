@@ -44,8 +44,6 @@ import org.slf4j.LoggerFactory;
 /**
  * A Guice Module which loads all extensions within the
  * GUACAMOLE_HOME/extensions directory, if any.
- *
- * @author Michael Jumper
  */
 public class ExtensionModule extends ServletModule {
 
@@ -61,7 +59,7 @@ public class ExtensionModule extends ServletModule {
     private static final List<String> ALLOWED_GUACAMOLE_VERSIONS =
         Collections.unmodifiableList(Arrays.asList(
             "*",
-            "0.9.12-incubating"
+            "0.9.13-incubating"
         ));
 
     /**

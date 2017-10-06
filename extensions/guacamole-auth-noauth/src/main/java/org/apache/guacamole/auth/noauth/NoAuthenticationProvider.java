@@ -62,9 +62,8 @@ import org.xml.sax.helpers.XMLReaderFactory;
  *      <param name="port" value="3389" />
  *    </config>
  *  </configs>
- *
- * @author Laurent Meunier
  */
+@Deprecated
 public class NoAuthenticationProvider extends SimpleAuthenticationProvider {
 
     /**
@@ -117,6 +116,10 @@ public class NoAuthenticationProvider extends SimpleAuthenticationProvider {
      */
     public NoAuthenticationProvider() throws GuacamoleException {
         environment = new LocalEnvironment();
+        logger.warn("The \"NoAuth\" extension is **DEPRECATED**! This "
+                + "extension will be removed from the Guacamole codebase "
+                + "entirely in a future release. Please consider writing an "
+                + "extension using Guacamole's extension API instead.");
     }
 
     @Override

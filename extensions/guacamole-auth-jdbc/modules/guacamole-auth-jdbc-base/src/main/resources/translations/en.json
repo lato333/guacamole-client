@@ -20,7 +20,16 @@
         "FIELD_HEADER_MAX_CONNECTIONS"          : "Maximum number of connections:",
         "FIELD_HEADER_MAX_CONNECTIONS_PER_USER" : "Maximum number of connections per user:",
 
-        "SECTION_HEADER_CONCURRENCY" : "Concurrency Limits"
+        "FIELD_HEADER_GUACD_HOSTNAME"   : "Hostname:",
+        "FIELD_HEADER_GUACD_ENCRYPTION" : "Encryption:",
+        "FIELD_HEADER_GUACD_PORT"       : "Port:",
+
+        "FIELD_OPTION_GUACD_ENCRYPTION_EMPTY" : "",
+        "FIELD_OPTION_GUACD_ENCRYPTION_NONE"  : "None (unencrypted)",
+        "FIELD_OPTION_GUACD_ENCRYPTION_SSL"   : "SSL / TLS",
+
+        "SECTION_HEADER_CONCURRENCY" : "Concurrency Limits",
+        "SECTION_HEADER_GUACD"       : "Guacamole Proxy Parameters (guacd)"
 
     },
 
@@ -75,10 +84,11 @@
         "FIELD_HEADER_TIMEZONE"            : "User time zone:",
         "FIELD_HEADER_VALID_FROM"          : "Enable account after:",
         "FIELD_HEADER_VALID_UNTIL"         : "Disable account after:",
-        "FIELD_HEADER_GAUTH_ENABLED"       : "Enable google authenticator:",
+       "FIELD_HEADER_GAUTH_ENABLED"       : "Enable google authenticator:",
         "FIELD_HEADER_SECRET_KEY"          : "Secret key for google authenticator:",
-        "SECTION_HEADER_RESTRICTIONS" : "Account Restrictions"
-		
+        "SECTION_HEADER_RESTRICTIONS" : "Account Restrictions",
+        "SECTION_HEADER_PROFILE"      : "Profile"
+
     }
 
 }

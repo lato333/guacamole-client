@@ -40,8 +40,6 @@ import org.apache.guacamole.token.TokenFilter;
  *
  * The interface provided by SimpleAuthenticationProvider is similar to that of
  * the AuthenticationProvider interface of older Guacamole releases.
- *
- * @author Michael Jumper
  */
 public abstract class SimpleAuthenticationProvider
     implements AuthenticationProvider {
@@ -65,8 +63,6 @@ public abstract class SimpleAuthenticationProvider
     /**
      * AuthenticatedUser which contains its own predefined set of authorized
      * configurations.
-     *
-     * @author Michael Jumper
      */
     private class SimpleAuthenticatedUser extends AbstractAuthenticatedUser {
 
@@ -205,6 +201,11 @@ public abstract class SimpleAuthenticationProvider
         // Otherwise, pull using credentials
         return getFilteredAuthorizedConfigurations(authenticatedUser.getCredentials());
 
+    }
+
+    @Override
+    public Object getResource() throws GuacamoleException {
+        return null;
     }
 
     @Override

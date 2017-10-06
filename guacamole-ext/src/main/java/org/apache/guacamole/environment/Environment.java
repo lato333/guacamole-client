@@ -22,6 +22,7 @@ package org.apache.guacamole.environment;
 import java.io.File;
 import java.util.Map;
 import org.apache.guacamole.GuacamoleException;
+import org.apache.guacamole.net.auth.GuacamoleProxyConfiguration;
 import org.apache.guacamole.properties.BooleanGuacamoleProperty;
 import org.apache.guacamole.properties.GuacamoleProperty;
 import org.apache.guacamole.properties.IntegerGuacamoleProperty;
@@ -31,8 +32,6 @@ import org.apache.guacamole.protocols.ProtocolInfo;
 /**
  * The environment of an arbitrary Guacamole instance, describing available
  * protocols, configuration parameters, and the GUACAMOLE_HOME directory.
- *
- * @author Michael Jumper
  */
 public interface Environment {
 
@@ -146,6 +145,21 @@ public interface Environment {
      *                            not specified.
      */
     public <Type> Type getRequiredProperty(GuacamoleProperty<Type> property)
+            throws GuacamoleException;
+
+    /**
+     * Returns the connection information which should be used, by default, to
+     * connect to guacd when establishing a remote desktop connection.
+     *
+     * @return
+     *     The connection information which should be used, by default, to
+     *     connect to guacd.
+     *
+     * @throws GuacamoleException
+     *     If the the connection information for guacd cannot be
+     *     retrieved.
+     */
+    public GuacamoleProxyConfiguration getDefaultGuacamoleProxyConfiguration()
             throws GuacamoleException;
 
 }

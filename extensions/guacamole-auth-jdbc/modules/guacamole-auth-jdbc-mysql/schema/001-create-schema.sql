@@ -57,6 +57,11 @@ CREATE TABLE `guacamole_connection` (
   `parent_id`           int(11),
   `protocol`            varchar(32)  NOT NULL,
   
+  -- Guacamole proxy (guacd) overrides
+  `proxy_port`              integer,
+  `proxy_hostname`          varchar(512),
+  `proxy_encryption_method` enum('NONE', 'SSL'),
+
   -- Concurrency limits
   `max_connections`          int(11),
   `max_connections_per_user` int(11),
@@ -105,6 +110,12 @@ CREATE TABLE `guacamole_user` (
   -- 2FA via google authenticator
   `gauth_enabled` boolean NOT NULL DEFAULT 0,
   `secret_key` varchar(128),
+
+  -- Profile information
+  `full_name`           VARCHAR(256),
+  `email_address`       VARCHAR(256),
+  `organization`        VARCHAR(256),
+  `organizational_role` VARCHAR(256),
 
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `username` (`username`)

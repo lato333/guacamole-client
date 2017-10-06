@@ -22,8 +22,6 @@ package org.apache.guacamole.protocol;
 /**
  * All possible statuses returned by various Guacamole instructions, each having
  * a corresponding code.
- * 
- * @author Michael Jumper
  */
 public enum GuacamoleStatus {
 
@@ -70,6 +68,41 @@ public enum GuacamoleStatus {
      * in use.
      */
     RESOURCE_CONFLICT(409, 1008, 0x0205),
+
+    /**
+     * The operation could not be performed as the requested resource is now
+     * closed.
+     */
+    RESOURCE_CLOSED(404, 1002, 0x0206),
+
+    /**
+     * The operation could not be performed because the upstream server does
+     * not appear to exist.
+     */
+    UPSTREAM_NOT_FOUND(502, 1011, 0x0207),
+
+    /**
+     * The operation could not be performed because the upstream server is not
+     * available to service the request.
+     */
+    UPSTREAM_UNAVAILABLE(502, 1011, 0x0208),
+
+    /**
+     * The session within the upstream server has ended because it conflicted
+     * with another session.
+     */
+    SESSION_CONFLICT(409, 1008, 0x0209),
+
+    /**
+     * The session within the upstream server has ended because it appeared to
+     * be inactive.
+     */
+    SESSION_TIMEOUT(408, 1002, 0x020A),
+
+    /**
+     * The session within the upstream server has been forcibly terminated.
+     */
+    SESSION_CLOSED(404, 1002, 0x020B),
 
     /**
      * The operation could not be performed because bad parameters were given.

@@ -30,8 +30,6 @@ import org.apache.guacamole.net.auth.AuthenticationProvider;
 
 /**
  * Guice module which configures LDAP-specific injections.
- *
- * @author Michael Jumper
  */
 public class LDAPAuthenticationProviderModule extends AbstractModule {
 

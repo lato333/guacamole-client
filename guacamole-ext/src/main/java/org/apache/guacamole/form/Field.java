@@ -29,8 +29,6 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
  * defined by the type string. The behavior of each field type is defined
  * either through the web application itself (see FormService.js) or through
  * extensions.
- *
- * @author Michael Jumper
  */
 @JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
 public class Field {
@@ -48,6 +46,12 @@ public class Field {
          * A text field, accepting arbitrary values.
          */
         public static String TEXT = "TEXT";
+
+        /**
+         * An email address field. This field type generally behaves
+         * identically to arbitrary text fields, but has semantic differences.
+         */
+        public static String EMAIL = "EMAIL";
 
         /**
          * A username field. This field type generally behaves identically to

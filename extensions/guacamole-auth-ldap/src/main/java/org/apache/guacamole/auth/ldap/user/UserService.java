@@ -25,7 +25,6 @@ import com.novell.ldap.LDAPConnection;
 import com.novell.ldap.LDAPEntry;
 import com.novell.ldap.LDAPException;
 import com.novell.ldap.LDAPSearchResults;
-import com.novell.ldap.LDAPSearchConstraints;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,8 +42,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Service for queries the users visible to a particular Guacamole user
  * according to an LDAP directory.
- *
- * @author Michael Jumper
  */
 public class UserService {
 
@@ -87,18 +84,24 @@ public class UserService {
             String usernameAttribute) throws GuacamoleException {
 
         try {
-            // Set search limits
-            LDAPSearchConstraints constraints = new LDAPSearchConstraints();
-            constraints.setMaxResults(confService.getMaxResults());
 
+            // Build a filter using the configured or default user search filter
+            // to find all user objects in the LDAP tree
+            StringBuilder userSearchFilter = new StringBuilder();
+            userSearchFilter.append("(&");
+            userSearchFilter.append(confService.getUserSearchFilter());
+            userSearchFilter.append("(");
+            userSearchFilter.append(escapingService.escapeLDAPSearchFilter(usernameAttribute));
+            userSearchFilter.append("=*))");
+         
             // Find all Guacamole users underneath base DN
             LDAPSearchResults results = ldapConnection.search(
                 confService.getUserBaseDN(),
                 LDAPConnection.SCOPE_SUB,
-                "(&(objectClass=*)(" + escapingService.escapeLDAPSearchFilter(usernameAttribute) + "=*))",
+                userSearchFilter.toString(),
                 null,
                 false,
-                constraints
+                confService.getLDAPSearchConstraints()
             );
 
             // Read all visible users
@@ -194,8 +197,10 @@ public class UserService {
         List<String> usernameAttributes = confService.getUsernameAttributes();
 
         // Build LDAP query for users having at least one username attribute
-        // with the specified username as its value
-        StringBuilder ldapQuery = new StringBuilder("(&(objectClass=*)");
+        // and with the configured or default search filter
+        StringBuilder ldapQuery = new StringBuilder();
+        ldapQuery.append("(&");
+        ldapQuery.append(confService.getUserSearchFilter());
 
         // Include all attributes within OR clause if there are more than one
         if (usernameAttributes.size() > 1)
@@ -256,7 +261,8 @@ public class UserService {
                 LDAPConnection.SCOPE_SUB,
                 generateLDAPQuery(username),
                 null,
-                false
+                false,
+                confService.getLDAPSearchConstraints()
             );
 
             // Add all DNs for found users

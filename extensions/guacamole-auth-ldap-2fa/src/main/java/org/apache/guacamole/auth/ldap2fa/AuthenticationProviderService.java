@@ -42,8 +42,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Service providing convenience functions for the LDAP AuthenticationProvider
  * implementation.
- *
- * @author Michael Jumper
  */
 public class AuthenticationProviderService {
 

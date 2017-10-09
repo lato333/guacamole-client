@@ -24,6 +24,7 @@ import com.google.inject.Provider;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,7 @@ import org.apache.guacamole.auth.jdbc.tunnel.GuacamoleTunnelService;
 import org.apache.guacamole.GuacamoleException;
 import org.apache.guacamole.auth.jdbc.JDBCEnvironment;
 import org.apache.guacamole.auth.jdbc.base.ModeledChildDirectoryObject;
+import org.apache.guacamole.form.BooleanField;
 import org.apache.guacamole.form.EnumField;
 import org.apache.guacamole.form.Field;
 import org.apache.guacamole.form.Form;
@@ -117,6 +119,18 @@ public class ModeledConnection extends ModeledChildDirectoryObject<ConnectionMod
     public static final String MAX_CONNECTIONS_PER_USER_NAME = "max-connections-per-user";
 
     /**
+     * The connection weight attribute used for weighted load balancing algorithms.
+     */
+    public static final String CONNECTION_WEIGHT = "weight";
+
+    /**
+     * The name of the attribute which controls whether the connection should
+     * be used as a spare only (all other non-spare connections within the same
+     * balancing group should be preferred).
+     */
+    public static final String FAILOVER_ONLY_NAME = "failover-only";
+
+    /**
      * All attributes related to restricting user accounts, within a logical
      * form.
      */
@@ -126,11 +140,20 @@ public class ModeledConnection extends ModeledChildDirectoryObject<ConnectionMod
     ));
 
     /**
+     * All attributes related to load balancing in a logical form.
+     */
+    public static final Form LOAD_BALANCING = new Form("load-balancing", Arrays.<Field>asList(
+        new NumericField(CONNECTION_WEIGHT),
+        new BooleanField(FAILOVER_ONLY_NAME, "true")
+    ));
+
+    /**
      * All possible attributes of connection objects organized as individual,
      * logical forms.
      */
     public static final Collection<Form> ATTRIBUTES = Collections.unmodifiableCollection(Arrays.asList(
         CONCURRENCY_LIMITS,
+        LOAD_BALANCING,
         GUACD_PARAMETERS
     ));
 
@@ -211,6 +234,11 @@ public class ModeledConnection extends ModeledChildDirectoryObject<ConnectionMod
     }
 
     @Override
+    public Date getLastActive() {
+        return null;
+    }
+
+    @Override
     public List<? extends ConnectionRecord> getHistory() throws GuacamoleException {
         return connectionService.retrieveHistory(getCurrentUser(), this);
     }
@@ -265,6 +293,12 @@ public class ModeledConnection extends ModeledChildDirectoryObject<ConnectionMod
             }
         }
 
+        // Set connection weight
+        attributes.put(CONNECTION_WEIGHT, NumericField.format(getModel().getConnectionWeight()));
+
+        // Set whether connection is failover-only
+        attributes.put(FAILOVER_ONLY_NAME, getModel().isFailoverOnly() ? "true" : null);
+
         return attributes;
     }
 
@@ -309,6 +343,16 @@ public class ModeledConnection extends ModeledChildDirectoryObject<ConnectionMod
         // Unimplemented / unspecified
         else
             getModel().setProxyEncryptionMethod(null);
+
+        // Translate connection weight attribute
+        try { getModel().setConnectionWeight(NumericField.parse(attributes.get(CONNECTION_WEIGHT))); }
+        catch (NumberFormatException e) {
+            logger.warn("Not setting the connection weight: {}", e.getMessage());
+            logger.debug("Unable to parse numeric attribute.", e);
+        }
+
+        // Translate failover-only attribute
+        getModel().setFailoverOnly("true".equals(attributes.get(FAILOVER_ONLY_NAME)));
 
     }
 
@@ -393,7 +437,37 @@ public class ModeledConnection extends ModeledChildDirectoryObject<ConnectionMod
             port             != null ? port             : defaultConfig.getPort(),
             encryptionMethod != null ? encryptionMethod : defaultConfig.getEncryptionMethod()
         );
+    }
 
+    /** 
+     * Returns the weight of the connection used in applying weighted
+     * load balancing algorithms, or a default of 1 if the 
+     * attribute is undefined.
+     *  
+     * @return
+     *     The weight of the connection used in applying weighted
+     *     load balancing algorithms.
+     */
+    public int getConnectionWeight() {
+
+        Integer connectionWeight = getModel().getConnectionWeight();
+        if (connectionWeight == null)
+            return 1;
+        return connectionWeight;
+
+    }
+
+    /**
+     * Returns whether this connection should be reserved for failover.
+     * Failover-only connections within a balancing group are only used when
+     * all non-failover connections are unavailable.
+     *
+     * @return
+     *     true if this connection should be reserved for failover, false
+     *     otherwise.
+     */
+    public boolean isFailoverOnly() {
+        return getModel().isFailoverOnly();
     }
 
 }

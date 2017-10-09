@@ -87,7 +87,8 @@ CREATE TABLE guacamole_connection_group (
 
 );
 
-CREATE INDEX ON guacamole_connection_group(parent_id);
+CREATE INDEX guacamole_connection_group_parent_id
+    ON guacamole_connection_group(parent_id);
 
 --
 -- Table of connections. Each connection has a name, protocol, and
@@ -106,6 +107,10 @@ CREATE TABLE guacamole_connection (
   max_connections          integer,
   max_connections_per_user integer,
 
+  -- Connection Weight
+  connection_weight        integer,
+  failover_only            boolean NOT NULL DEFAULT FALSE,
+
   -- Guacamole proxy (guacd) overrides
   proxy_port              integer,
   proxy_hostname          varchar(512),
@@ -123,7 +128,8 @@ CREATE TABLE guacamole_connection (
 
 );
 
-CREATE INDEX ON guacamole_connection(parent_id);
+CREATE INDEX guacamole_connection_parent_id
+    ON guacamole_connection(parent_id);
 
 --
 -- Table of users. Each user has a unique username and a hashed password
@@ -202,7 +208,8 @@ CREATE TABLE guacamole_sharing_profile (
 
 );
 
-CREATE INDEX ON guacamole_sharing_profile(primary_connection_id);
+CREATE INDEX guacamole_sharing_profile_primary_connection_id
+    ON guacamole_sharing_profile(primary_connection_id);
 
 --
 -- Table of connection parameters. Each parameter is simply a name/value pair
@@ -223,7 +230,8 @@ CREATE TABLE guacamole_connection_parameter (
 
 );
 
-CREATE INDEX ON guacamole_connection_parameter(connection_id);
+CREATE INDEX guacamole_connection_parameter_connection_id
+    ON guacamole_connection_parameter(connection_id);
 
 --
 -- Table of sharing profile parameters. Each parameter is simply
@@ -246,7 +254,8 @@ CREATE TABLE guacamole_sharing_profile_parameter (
 
 );
 
-CREATE INDEX ON guacamole_sharing_profile_parameter(sharing_profile_id);
+CREATE INDEX guacamole_sharing_profile_parameter_sharing_profile_id
+    ON guacamole_sharing_profile_parameter(sharing_profile_id);
 
 --
 -- Table of connection permissions. Each connection permission grants a user
@@ -271,8 +280,11 @@ CREATE TABLE guacamole_connection_permission (
 
 );
 
-CREATE INDEX ON guacamole_connection_permission(connection_id);
-CREATE INDEX ON guacamole_connection_permission(user_id);
+CREATE INDEX guacamole_connection_permission_connection_id
+    ON guacamole_connection_permission(connection_id);
+
+CREATE INDEX guacamole_connection_permission_user_id
+    ON guacamole_connection_permission(user_id);
 
 --
 -- Table of connection group permissions. Each group permission grants a user
@@ -297,8 +309,11 @@ CREATE TABLE guacamole_connection_group_permission (
 
 );
 
-CREATE INDEX ON guacamole_connection_group_permission(connection_group_id);
-CREATE INDEX ON guacamole_connection_group_permission(user_id);
+CREATE INDEX guacamole_connection_group_permission_connection_group_id
+    ON guacamole_connection_group_permission(connection_group_id);
+
+CREATE INDEX guacamole_connection_group_permission_user_id
+    ON guacamole_connection_group_permission(user_id);
 
 --
 -- Table of sharing profile permissions. Each sharing profile permission grants
@@ -323,8 +338,11 @@ CREATE TABLE guacamole_sharing_profile_permission (
 
 );
 
-CREATE INDEX ON guacamole_sharing_profile_permission(sharing_profile_id);
-CREATE INDEX ON guacamole_sharing_profile_permission(user_id);
+CREATE INDEX guacamole_sharing_profile_permission_sharing_profile_id
+    ON guacamole_sharing_profile_permission(sharing_profile_id);
+
+CREATE INDEX guacamole_sharing_profile_permission_user_id
+    ON guacamole_sharing_profile_permission(user_id);
 
 --
 -- Table of system permissions. Each system permission grants a user a
@@ -344,7 +362,8 @@ CREATE TABLE guacamole_system_permission (
 
 );
 
-CREATE INDEX ON guacamole_system_permission(user_id);
+CREATE INDEX guacamole_system_permission_user_id
+    ON guacamole_system_permission(user_id);
 
 --
 -- Table of user permissions. Each user permission grants a user access to
@@ -369,8 +388,11 @@ CREATE TABLE guacamole_user_permission (
 
 );
 
-CREATE INDEX ON guacamole_user_permission(affected_user_id);
-CREATE INDEX ON guacamole_user_permission(user_id);
+CREATE INDEX guacamole_user_permission_affected_user_id
+    ON guacamole_user_permission(affected_user_id);
+
+CREATE INDEX guacamole_user_permission_user_id
+    ON guacamole_user_permission(user_id);
 
 --
 -- Table of connection history records. Each record defines a specific user's
@@ -383,6 +405,7 @@ CREATE TABLE guacamole_connection_history (
   history_id           serial       NOT NULL,
   user_id              integer      DEFAULT NULL,
   username             varchar(128) NOT NULL,
+  remote_host          varchar(256) DEFAULT NULL,
   connection_id        integer      DEFAULT NULL,
   connection_name      varchar(128) NOT NULL,
   sharing_profile_id   integer      DEFAULT NULL,
@@ -406,11 +429,20 @@ CREATE TABLE guacamole_connection_history (
 
 );
 
-CREATE INDEX ON guacamole_connection_history(user_id);
-CREATE INDEX ON guacamole_connection_history(connection_id);
-CREATE INDEX ON guacamole_connection_history(sharing_profile_id);
-CREATE INDEX ON guacamole_connection_history(start_date);
-CREATE INDEX ON guacamole_connection_history(end_date);
+CREATE INDEX guacamole_connection_history_user_id
+    ON guacamole_connection_history(user_id);
+
+CREATE INDEX guacamole_connection_history_connection_id
+    ON guacamole_connection_history(connection_id);
+
+CREATE INDEX guacamole_connection_history_sharing_profile_id
+    ON guacamole_connection_history(sharing_profile_id);
+
+CREATE INDEX guacamole_connection_history_start_date
+    ON guacamole_connection_history(start_date);
+
+CREATE INDEX guacamole_connection_history_end_date
+    ON guacamole_connection_history(end_date);
 
 --
 -- User password history
@@ -434,4 +466,6 @@ CREATE TABLE guacamole_user_password_history (
 
 );
 
-CREATE INDEX ON guacamole_user_password_history(user_id);
+CREATE INDEX guacamole_user_password_history_user_id
+    ON guacamole_user_password_history(user_id);
+

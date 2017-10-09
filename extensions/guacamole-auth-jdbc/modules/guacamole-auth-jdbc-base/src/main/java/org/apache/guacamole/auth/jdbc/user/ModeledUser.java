@@ -31,6 +31,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import org.apache.guacamole.auth.jdbc.base.ModeledDirectoryObject;
@@ -51,6 +52,7 @@ import org.apache.guacamole.form.Form;
 import org.apache.guacamole.form.TextField;
 import org.apache.guacamole.form.TimeField;
 import org.apache.guacamole.form.TimeZoneField;
+import org.apache.guacamole.net.auth.ActivityRecord;
 import org.apache.guacamole.net.auth.User;
 import org.apache.guacamole.net.auth.permission.ObjectPermissionSet;
 import org.apache.guacamole.net.auth.permission.SystemPermission;
@@ -794,6 +796,42 @@ public class ModeledUser extends ModeledDirectoryObject<UserModel> implements Us
      */
     public boolean isAccountAccessible() {
         return isActive(getAccessWindowStart(), getAccessWindowEnd());
+    }
+
+    /**
+     * Returns whether this user account has been disabled. The credentials of
+     * disabled user accounts are treated as invalid, effectively disabling
+     * that user's access to data for which they would otherwise have
+     * permission.
+     *
+     * @return
+     *     true if this user account has been disabled, false otherwise.
+     */
+    public boolean isDisabled() {
+        return getModel().isDisabled();
+    }
+
+    /**
+     * Returns whether this user's password has expired. If a user's password
+     * is expired, it must be immediately changed upon login. A user account
+     * with an expired password cannot be used until the password has been
+     * changed.
+     *
+     * @return
+     *     true if this user's password has expired, false otherwise.
+     */
+    public boolean isExpired() {
+        return getModel().isExpired();
+    }
+
+    @Override
+    public Date getLastActive() {
+        return null;
+    }
+
+    @Override
+    public List<ActivityRecord> getHistory() throws GuacamoleException {
+        return Collections.<ActivityRecord>emptyList();
     }
 
 }

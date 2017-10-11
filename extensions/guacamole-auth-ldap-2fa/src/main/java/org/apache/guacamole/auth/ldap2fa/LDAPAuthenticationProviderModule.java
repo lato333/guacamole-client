@@ -20,7 +20,6 @@
 package org.apache.guacamole.auth.ldap2fa;
 
 import com.google.inject.AbstractModule;
-
 import org.apache.guacamole.auth.ldap2fa.connection.ConnectionService;
 import org.apache.guacamole.auth.ldap2fa.user.UserService;
 import org.apache.guacamole.GuacamoleException;

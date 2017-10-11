@@ -27,12 +27,11 @@ import com.warrenstrange.googleauth.GoogleAuthenticatorException;
 import com.warrenstrange.googleauth.GoogleAuthenticatorConfig.GoogleAuthenticatorConfigBuilder;
 
 import java.util.List;
-
-import org.apache.guacamole.GuacamoleException;
-import org.apache.guacamole.auth.ldap2fa.TotpRepository;
 import org.apache.guacamole.auth.ldap2fa.user.AuthenticatedUser;
 import org.apache.guacamole.auth.ldap2fa.user.UserContext;
+import org.apache.guacamole.GuacamoleException;
 import org.apache.guacamole.auth.ldap2fa.user.UserService;
+import org.apache.guacamole.auth.ldap2fa.TotpRepository;
 import org.apache.guacamole.net.auth.Credentials;
 import org.apache.guacamole.net.auth.credentials.CredentialsInfo;
 import org.apache.guacamole.net.auth.credentials.GuacamoleInvalidCredentialsException;

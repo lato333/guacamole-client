@@ -67,12 +67,11 @@ public class LDAPAuthenticationProvider implements AuthenticationProvider {
     public String getIdentifier() {
         return "ldap2fa";
     }
-    
+
     @Override
     public String getResource() {
         return null;
     }
-
 
     @Override
     public AuthenticatedUser authenticateUser(Credentials credentials) throws GuacamoleException {
@@ -102,6 +101,11 @@ public class LDAPAuthenticationProvider implements AuthenticationProvider {
             AuthenticatedUser authenticatedUser,
             Credentials credentials) throws GuacamoleException {
         return context;
+    }
+
+    @Override
+    public void shutdown() {
+        // Do nothing
     }
 
 }

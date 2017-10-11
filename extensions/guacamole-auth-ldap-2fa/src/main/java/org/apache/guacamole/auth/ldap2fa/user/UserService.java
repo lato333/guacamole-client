@@ -25,16 +25,14 @@ import com.novell.ldap.LDAPConnection;
 import com.novell.ldap.LDAPEntry;
 import com.novell.ldap.LDAPException;
 import com.novell.ldap.LDAPSearchResults;
-import com.novell.ldap.LDAPSearchConstraints;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.guacamole.GuacamoleException;
-import org.apache.guacamole.GuacamoleServerException;
 import org.apache.guacamole.auth.ldap2fa.ConfigurationService;
 import org.apache.guacamole.auth.ldap2fa.EscapingService;
+import org.apache.guacamole.GuacamoleException;
+import org.apache.guacamole.GuacamoleServerException;
 import org.apache.guacamole.auth.ldap2fa.LDAPGuacamoleProperties;
 import org.apache.guacamole.net.auth.User;
 import org.apache.guacamole.net.auth.simple.SimpleUser;
@@ -86,30 +84,24 @@ public class UserService {
             String usernameAttribute) throws GuacamoleException {
 
         try {
-            // Set search limits
-            LDAPSearchConstraints constraints = new LDAPSearchConstraints();
-            constraints.setMaxResults(confService.getMaxResults());
-            
 
-			String searchFilter = "(&(objectClass=*)(" + escapingService.escapeLDAPSearchFilter(usernameAttribute)
-					+ "=*)";
-			String userFilter = confService.getUserFilter();
-			if (userFilter != null) {
-				searchFilter += userFilter.trim();
-			}
-			searchFilter += ")";
-
-			logger.debug("Using search filter: " + searchFilter);
-
-
+            // Build a filter using the configured or default user search filter
+            // to find all user objects in the LDAP tree
+            StringBuilder userSearchFilter = new StringBuilder();
+            userSearchFilter.append("(&");
+            userSearchFilter.append(confService.getUserSearchFilter());
+            userSearchFilter.append("(");
+            userSearchFilter.append(escapingService.escapeLDAPSearchFilter(usernameAttribute));
+            userSearchFilter.append("=*))");
+         
             // Find all Guacamole users underneath base DN
             LDAPSearchResults results = ldapConnection.search(
                 confService.getUserBaseDN(),
                 LDAPConnection.SCOPE_SUB,
-                searchFilter,
+                userSearchFilter.toString(),
                 null,
                 false,
-                constraints
+                confService.getLDAPSearchConstraints()
             );
 
             // Read all visible users
@@ -205,8 +197,10 @@ public class UserService {
         List<String> usernameAttributes = confService.getUsernameAttributes();
 
         // Build LDAP query for users having at least one username attribute
-        // with the specified username as its value
-        StringBuilder ldapQuery = new StringBuilder("(&(objectClass=*)");
+        // and with the configured or default search filter
+        StringBuilder ldapQuery = new StringBuilder();
+        ldapQuery.append("(&");
+        ldapQuery.append(confService.getUserSearchFilter());
 
         // Include all attributes within OR clause if there are more than one
         if (usernameAttributes.size() > 1)
@@ -224,11 +218,6 @@ public class UserService {
         // Close OR clause, if any
         if (usernameAttributes.size() > 1)
             ldapQuery.append(")");
-
-		// user filter
-		String userFilter = confService.getUserFilter();
-		if (userFilter != null)
-			ldapQuery.append(userFilter.trim());
 
         // Close overall query (AND clause)
         ldapQuery.append(")");
@@ -262,9 +251,6 @@ public class UserService {
             String username) throws GuacamoleException {
 
         try {
-			// Set search limits
-			LDAPSearchConstraints constraints = new LDAPSearchConstraints();
-			constraints.setMaxResults(confService.getMaxResults());
 
             List<String> userDNs = new ArrayList<String>();
 
@@ -276,7 +262,7 @@ public class UserService {
                 generateLDAPQuery(username),
                 null,
                 false,
-                constraints
+                confService.getLDAPSearchConstraints()
             );
 
             // Add all DNs for found users

@@ -29,12 +29,11 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.guacamole.GuacamoleException;
-import org.apache.guacamole.GuacamoleServerException;
+import org.apache.guacamole.auth.ldap2fa.LDAPAuthenticationProvider;
 import org.apache.guacamole.auth.ldap2fa.ConfigurationService;
 import org.apache.guacamole.auth.ldap2fa.EscapingService;
-import org.apache.guacamole.auth.ldap2fa.LDAPAuthenticationProvider;
+import org.apache.guacamole.GuacamoleException;
+import org.apache.guacamole.GuacamoleServerException;
 import org.apache.guacamole.net.auth.AuthenticatedUser;
 import org.apache.guacamole.net.auth.Connection;
 import org.apache.guacamole.net.auth.simple.SimpleConnection;
@@ -47,8 +46,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Service for querying the connections available to a particular Guacamole
  * user according to an LDAP directory.
- *
- * @author Michael Jumper
  */
 public class ConnectionService {
 
@@ -120,12 +117,13 @@ public class ConnectionService {
                 LDAPConnection.SCOPE_SUB,
                 connectionSearchFilter,
                 null,
-                false
+                false,
+                confService.getLDAPSearchConstraints()
             );
 
             // Build token filter containing credential tokens
             TokenFilter tokenFilter = new TokenFilter();
-            StandardTokens.addStandardTokens(tokenFilter, user.getCredentials());
+            StandardTokens.addStandardTokens(tokenFilter, user);
 
             // Produce connections for each readable configuration
             Map<String, Connection> connections = new HashMap<String, Connection>();
@@ -243,7 +241,8 @@ public class ConnectionService {
                 LDAPConnection.SCOPE_SUB,
                 "(&(!(objectClass=guacConfigGroup))(member=" + escapingService.escapeLDAPSearchFilter(userDN) + "))",
                 null,
-                false
+                false,
+                confService.getLDAPSearchConstraints()
             );
 
             // Append the additional user groups to the LDAP filter

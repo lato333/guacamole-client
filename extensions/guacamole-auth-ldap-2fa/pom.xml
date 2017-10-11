@@ -152,7 +152,7 @@
             <artifactId>guice-multibindings</artifactId>
             <version>3.0</version>
         </dependency>
-	<!-- Google Authenticator -->       
+		<!-- Google Authenticator -->       
 		<dependency>
   			<groupId>com.warrenstrange</groupId>
   			<artifactId>googleauth</artifactId>

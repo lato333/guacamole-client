@@ -152,20 +152,26 @@ public class LDAPGuacamoleProperties {
         public String getName() { return "ldap-max-search-results"; }
 
     };
-    
 
-	
-	/**
-	 * Filter User belonging to particular group
-	 */
-	public static final StringGuacamoleProperty LDAP_USER_FILTER = new StringGuacamoleProperty() {
+    /**
+     * Property that controls whether or not the LDAP connection follows
+     * (dereferences) aliases as it searches the tree.
+     */
+    public static final DereferenceAliasesProperty LDAP_DEREFERENCE_ALIASES = new DereferenceAliasesProperty() {
 
-		@Override
-		public String getName() {
-			return "ldap-user-filter";
-		}
+        @Override
+        public String getName() { return "ldap-dereference-aliases"; }
 
-	};
+    };
 
+    /**
+     * A search filter to apply to user LDAP queries.
+     */
+    public static final StringGuacamoleProperty LDAP_USER_SEARCH_FILTER = new StringGuacamoleProperty() {
+
+        @Override
+        public String getName() { return "ldap-user-search-filter"; }
+
+    };
 
 }
